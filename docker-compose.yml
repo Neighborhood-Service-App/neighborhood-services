@@ -18,7 +18,7 @@ services:
 
   mongodb:
     image: mongo
-    container_name: mongo_db
+    container_name: neighborhood_mongo_db
     ports:
       - "27017:27017"
     volumes:
@@ -31,7 +31,7 @@ services:
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
-    container_name: zookeeper
+    container_name: neighborhood_zookeeper
     environment:
       ZOOKEEPER_SERVER_ID: 1     # Needed only for local development
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -60,7 +60,7 @@ services:
 
   keycloak:
     container_name: neighborhood_keycloak
-    image: quay.io/keycloak/keycloak
+    image: quay.io/keycloak/keycloak:latest
     ports:
       - 9099:8080
     environment:
