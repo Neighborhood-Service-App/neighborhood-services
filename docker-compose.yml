@@ -58,18 +58,6 @@ services:
     networks:
       - neighborhood-net
 
-  keycloak:
-    container_name: neighborhood_keycloak
-    image: quay.io/keycloak/keycloak:latest
-    ports:
-      - 9099:8080
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-    networks:
-      - neighborhood-net
-    command:
-      - "start-dev"
 
 
 
