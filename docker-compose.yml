@@ -4,7 +4,7 @@ services:
     container_name: neighborhood_pg_sql
     image: postgres
     environment:
-      POSTGRES_USER: dragand
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
       PGDATA: /data/postgres
     volumes:
@@ -15,7 +15,6 @@ services:
       - neighborhood-net
     restart: unless-stopped
 
-
   mongodb:
     image: mongo
     container_name: neighborhood_mongo_db
@@ -24,16 +23,14 @@ services:
     volumes:
       - mongo:/data
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=dragand
-      - MONGO_INITDB_ROOT_PASSWORD=root
-
-
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: neighborhood_zookeeper
     environment:
-      ZOOKEEPER_SERVER_ID: 1     # Needed only for local development
+      ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
@@ -58,24 +55,10 @@ services:
     networks:
       - neighborhood-net
 
-
-
-
-
-#  zipkin:
-#    container_name: zipkin
-#    image: openzipkin/zipkin
-#    ports:
-#      - "9411:9411"
-#    networks:
-#      - microservices-net
-
-
 networks:
   neighborhood-net:
     driver: bridge
 
 volumes:
   postgres:
-  pgadmin:
   mongo:
