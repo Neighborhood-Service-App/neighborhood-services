@@ -25,5 +25,13 @@ spring:
 #          predicates:
 #            - Path=/api/v1/applicants/**
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/realms/neighborhood-services-realm
+          jwk-set-uri: http://localhost:9090/realms/neighborhood-services-realm/protocol/openid-connect/certs
+
+
 server:
   port: 8100
