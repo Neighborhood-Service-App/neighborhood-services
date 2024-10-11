@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * The user entity.
@@ -18,6 +19,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+@Builder
 @Table(name = "users")
 public class User {
 
@@ -25,20 +27,19 @@ public class User {
      * The unique identifier for the user.
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
-    private Long userId;
+    private UUID userId;
 
     /**
      * The first name of the user.
      */
-    @Column(nullable = false, updatable = false, length = 100)
+    @Column(updatable = false, length = 100)
     private String firstName;
 
     /**
      * The last name of the user.
      */
-    @Column(nullable = false, updatable = false, length = 100)
+    @Column(updatable = false, length = 100)
     private String lastName;
 
     /**
@@ -51,15 +52,15 @@ public class User {
     /**
      * The phone number of the user.
      */
-    @Column(nullable = false, length = 13)
+    @Column(length = 13)
     @ValidPhoneNumber
     private String phoneNumber;
 
     /**
-     * The password of the user.
+     * About section of user
      */
-    @Column(nullable = false, length = 255)
-    private String password;
+    @Column(length = 255)
+    private String about;
 
     /**
      * The timestamp when the user was created. It is set automatically when a new user is created.
