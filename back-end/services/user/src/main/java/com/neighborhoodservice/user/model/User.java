@@ -1,12 +1,16 @@
 package com.neighborhoodservice.user.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neighborhoodservice.user.validation.ValidPhoneNumber;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,8 +20,6 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 @Entity
 @Builder
 @Table(name = "users")
@@ -65,6 +67,7 @@ public class User {
     /**
      * The timestamp when the user was created. It is set automatically when a new user is created.
      */
+    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
@@ -72,6 +75,7 @@ public class User {
     /**
      * The timestamp when the user was last updated. It is set automatically when a user is updated.
      */
+    @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime lastUpdatedAt;
 
@@ -84,19 +88,9 @@ public class User {
     /**
      * The list of addresses associated with the user.
      */
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Address> addresses;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        lastUpdatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        lastUpdatedAt = LocalDateTime.now();
-    }
+    private List<Address> addresses = new ArrayList<>();
 
 
 }

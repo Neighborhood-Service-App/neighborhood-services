@@ -29,7 +29,7 @@ public class Address {
      * The user who owns the address.
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     /**
