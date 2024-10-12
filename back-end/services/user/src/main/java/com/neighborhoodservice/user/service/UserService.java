@@ -1,7 +1,8 @@
 package com.neighborhoodservice.user.service;
 
 import com.neighborhoodservice.user.dto.RegisterDto;
-import com.neighborhoodservice.user.exception.UserAlreadyExistsException;
+import com.neighborhoodservice.user.exception.ResourceAlreadyExistsException;
+import com.neighborhoodservice.user.exception.ResourceNotFoundException;
 import com.neighborhoodservice.user.model.User;
 import com.neighborhoodservice.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -28,8 +29,8 @@ public class UserService {
                 .addresses(new ArrayList<>())
                 .build();
 
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new UserAlreadyExistsException("User with email " + user.getEmail() + " already exists");
+        if (userRepository.existsByEmail(user.getEmail()) || userRepository.existsById(user.getUserId())) {
+            throw new ResourceAlreadyExistsException("User with email " + user.getEmail() + " already exists");
         }
         userRepository.save(user);
         log.info("User with id {} has been registered", user.getUserId());
@@ -37,7 +38,8 @@ public class UserService {
     }
 
     public User getUserById(UUID userId) {
-        return userRepository.findById(userId).orElse(null);
+        return userRepository.findById(userId)
+                .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
     }
 
 }

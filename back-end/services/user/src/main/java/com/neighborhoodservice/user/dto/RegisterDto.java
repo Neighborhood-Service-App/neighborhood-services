@@ -1,17 +1,16 @@
 package com.neighborhoodservice.user.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
 public record RegisterDto(
 
-        @Pattern(regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-                message = "Invalid UUID format")
+        @NotNull(message = "Id cannot be blank")
         UUID id,
 
-        @Email
+        @Email(message = "Email should be valid")
         String email
 ) {
 
