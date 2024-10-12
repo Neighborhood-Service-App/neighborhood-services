@@ -19,7 +19,7 @@ public class JWTUtils {
 
     private PublicKey getPublicKey() throws Exception {
         // Get the public key from the environment variable
-        String publicKeyPem = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsXguwWMRONpFl6YnI12KbFSQa9TiPZ30c+WM34QvefxoCR8XuxrQAhLwh8N1osYB1ueq8im8rMeTxEwpC4ndNjhLUpV7kHDZC08+AtDMoEcsF+ErRGl2ltAqJetdNBdg31BJeQo5IOdfyEjZBt7F7K3B0P1B3WV9uJg8f8p6e7XQjpleBSufcn+EAPaFsl4ObYccXE/FjnU2+DwiwlxNEUGxlKU/PhsVhkcKVwycvD3jhlqpcLQ0cQvFvaGbjpnhsOpU0Kf+1RqQbe7v/yKNjIg6KVv0v+DKBiHOBnhvtAoFubVO9zgtT5VJipLoRDw6MUuOW0Eu31Qf3ObnVKnijwIDAQAB";
+        String publicKeyPem = System.getenv("KEYCLOAK_PUBLIC_KEY");
 
 
         // Decode the base64 encoded public key
