@@ -32,7 +32,7 @@ public class AddressController {
     ) throws Exception {
 
 //        Authorization check
-        if (authorizeUser(userId, token)) {
+        if (!authorizeUser(userId, token)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .build();
         }
@@ -61,8 +61,25 @@ public class AddressController {
     }
 
 
+    @DeleteMapping("/{addressId}")
+    public ResponseEntity<HttpStatus> deleteAddress(
+            @PathVariable UUID userId,
+            @PathVariable Long addressId,
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
+
+        return addressService.deleteAddressById(userId, addressId, token);
+
+    }
 
 
+    /**
+     * Authorize user by checking if the token belongs to the user
+     * @param userId user id
+     * @param token JWT token
+     * @return true if the token belongs to the user
+     * @throws Exception if the token is invalid
+     */
     private boolean authorizeUser(UUID userId, String token) throws Exception {
         if (JWTUtils.getUserIdFromToken(token).equals(userId)) {
             return true;

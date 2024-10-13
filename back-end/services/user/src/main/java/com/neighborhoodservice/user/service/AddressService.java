@@ -1,5 +1,6 @@
 package com.neighborhoodservice.user.service;
 
+import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
 import com.neighborhoodservice.user.dto.AddressPatchRequest;
 import com.neighborhoodservice.user.dto.AddressResponse;
 import com.neighborhoodservice.user.exception.ResourceNotFoundException;
@@ -8,6 +9,10 @@ import com.neighborhoodservice.user.model.User;
 import com.neighborhoodservice.user.repository.AddressRepository;
 import com.neighborhoodservice.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -18,8 +23,10 @@ import java.util.UUID;
 @Service
 public class AddressService {
 
+    private static final Logger log = LoggerFactory.getLogger(AddressService.class);
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
+    private final JWTUtils JWTUtils;
 
     public void addAddress(UUID userId, AddressPatchRequest addressPatchRequest) {
 
@@ -61,5 +68,40 @@ public class AddressService {
                             address.isDefault()
                     ))
                     .toList();
+    }
+
+    public ResponseEntity<HttpStatus> deleteAddressById(UUID userId, Long addressId, String token) throws Exception {
+
+//            Check if user exists
+            if (!userRepository.existsById(userId)) {
+                throw new ResourceNotFoundException("User with id " + userId + " not found");
+            }
+
+//            Check if address exists and if so, store in variable
+           Address address = addressRepository.findById(addressId)
+                   .orElseThrow( () -> new ResourceNotFoundException("Address with id " + addressId + " not found"));
+
+//            Check if address belongs to the user
+            if (!address.getUser().getUserId().equals(userId)) {
+                throw new ResourceNotFoundException("Address with id " + addressId + " is not found for user with id " + userId);
+            }
+
+//            Check if user is authorized to delete the address
+            if (!authorizeUser(userId, token)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .build();
+            }
+
+           addressRepository.deleteById(addressId);
+           log.info("Address with id {} deleted", addressId);
+           return ResponseEntity.accepted()
+                   .build();
+    }
+
+    private boolean authorizeUser(UUID userId, String token) throws Exception {
+        if (JWTUtils.getUserIdFromToken(token).equals(userId)) {
+            return true;
+        }
+        return false;
     }
 }
