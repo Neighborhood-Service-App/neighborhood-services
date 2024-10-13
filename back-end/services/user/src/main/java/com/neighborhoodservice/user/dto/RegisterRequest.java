@@ -1,16 +1,18 @@
 package com.neighborhoodservice.user.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import org.hibernate.validator.constraints.UUID;
 
-import java.util.UUID;
 
 public record RegisterRequest(
 
-        @NotNull(message = "Id cannot be blank")
-        UUID id,
+        @UUID
+        @NotEmpty(message = "Invalid UUID format")
+        String id,
 
-        @Email(message = "Email should be valid")
+        @NotEmpty
+        @Email(message = "Invalid email format")
         String email
 ) {
 

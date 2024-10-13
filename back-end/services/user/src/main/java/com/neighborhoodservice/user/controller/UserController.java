@@ -37,15 +37,17 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable UUID userId) {
-
-        log.info("Getting user with id {}", userId);
         return ok(userService.getUserById(userId));
-
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<UUID> deleteUser(@PathVariable UUID userId) {
+    public ResponseEntity<UUID> deleteUser(@PathVariable UUID userId,
+                                           @RequestHeader("Authorization") String token
+    )throws Exception {
 
+        if (!JWTUtils.hasAdminRole(token)){
+            return ResponseEntity.status(403).build();
+        }
         log.info("Deleting user with id {}", userId);
         return ok(userService.deleteUser(userId));
 

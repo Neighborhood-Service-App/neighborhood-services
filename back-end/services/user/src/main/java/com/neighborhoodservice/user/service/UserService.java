@@ -26,7 +26,7 @@ public class UserService {
     @Transactional
     public UUID registerUser(RegisterRequest request) {
 
-        if (userRepository.existsByEmail(request.email()) || userRepository.existsById(request.id())) {
+        if (userRepository.existsByEmail(request.email()) || userRepository.existsById(UUID.fromString(request.id()))) {
             throw new ResourceAlreadyExistsException("User with email " + request.email() + " already exists");
         }
 
@@ -45,6 +45,9 @@ public class UserService {
 
     @Transactional
     public UUID deleteUser(UUID userId) {
+
+
+
         User user = userRepository.findById(userId)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
 

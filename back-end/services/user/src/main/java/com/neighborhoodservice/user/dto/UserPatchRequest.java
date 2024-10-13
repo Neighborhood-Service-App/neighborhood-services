@@ -1,9 +1,8 @@
 package com.neighborhoodservice.user.dto;
 
 import com.neighborhoodservice.user.model.Address;
-import com.neighborhoodservice.user.validation.ValidPhoneNumber;
 import jakarta.persistence.Column;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.List;
@@ -16,7 +15,7 @@ public record UserPatchRequest(
         String lastName,
 
         @Column(length = 13)
-        @ValidPhoneNumber
+        @Pattern(regexp = "^\\+?3?8?(0\\d{9})$", message = "Invalid phone number format")
         String phoneNumber,
 
         @Length(min = 1, max = 255, message = "Last name must be between 1 and 100 characters")

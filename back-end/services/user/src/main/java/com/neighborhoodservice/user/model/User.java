@@ -2,9 +2,9 @@ package com.neighborhoodservice.user.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.neighborhoodservice.user.validation.ValidPhoneNumber;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -55,7 +55,7 @@ public class User {
      * The phone number of the user.
      */
     @Column(length = 13)
-    @ValidPhoneNumber
+    @Pattern(regexp = "^\\+?3?8?(0\\d{9})$", message = "Invalid phone number format")
     private String phoneNumber;
 
     /**

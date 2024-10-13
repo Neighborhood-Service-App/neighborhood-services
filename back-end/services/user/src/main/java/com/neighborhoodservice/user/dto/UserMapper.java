@@ -3,12 +3,14 @@ package com.neighborhoodservice.user.dto;
 import com.neighborhoodservice.user.model.User;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class UserMapper {
 
     public User toUser(RegisterRequest registerRequest) {
         return User.builder()
-                .userId(registerRequest.id())
+                .userId(UUID.fromString(registerRequest.id()))
                 .email(registerRequest.email())
                 .build();
 
