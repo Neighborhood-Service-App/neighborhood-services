@@ -1,8 +1,6 @@
 package com.neighborhoodservice.user.service;
 
-import com.neighborhoodservice.user.dto.RegisterRequest;
-import com.neighborhoodservice.user.dto.UserMapper;
-import com.neighborhoodservice.user.dto.UserResponse;
+import com.neighborhoodservice.user.dto.*;
 import com.neighborhoodservice.user.exception.ResourceAlreadyExistsException;
 import com.neighborhoodservice.user.exception.ResourceNotFoundException;
 import com.neighborhoodservice.user.model.User;
@@ -22,6 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserPatchMapper userPatchMapper;
 
 
     @Transactional
@@ -53,4 +52,20 @@ public class UserService {
         log.info("User with id {} has been deleted", userId);
         return userId;
     }
+
+
+    @Transactional
+    public UserResponse updateUser(UUID userId, UserPatchRequest userPatchRequest) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID " + userId + " not found"));
+
+//        TODO: Validate address in userPatchRequest
+        userPatchMapper.updateUserFromDto(userPatchRequest, user);
+
+        return userMapper.fromUser(userRepository.save(user));
+    }
+
+
+
 }

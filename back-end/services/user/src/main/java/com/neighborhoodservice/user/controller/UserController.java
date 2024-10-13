@@ -2,6 +2,7 @@ package com.neighborhoodservice.user.controller;
 
 import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
 import com.neighborhoodservice.user.dto.RegisterRequest;
+import com.neighborhoodservice.user.dto.UserPatchRequest;
 import com.neighborhoodservice.user.dto.UserResponse;
 import com.neighborhoodservice.user.service.UserService;
 import jakarta.validation.Valid;
@@ -31,20 +32,31 @@ public class UserController {
         if (!JWTUtils.hasAdminRole(token)){
             return ResponseEntity.status(403).build();
         }
-       return ResponseEntity.ok(userService.registerUser(registerRequest));
+       return ok(userService.registerUser(registerRequest));
     }
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable UUID userId) {
+
         log.info("Getting user with id {}", userId);
         return ok(userService.getUserById(userId));
+
     }
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<UUID> deleteUser(@PathVariable UUID userId) {
+
         log.info("Deleting user with id {}", userId);
-        userService.deleteUser(userId);
-        return ResponseEntity.ok().build();
+        return ok(userService.deleteUser(userId));
+
+    }
+
+    @PatchMapping("/{userId}")
+    public ResponseEntity<UserResponse> updateUser(@PathVariable UUID userId,
+                                           @RequestBody @Valid UserPatchRequest userPatchRequest
+    ) {
+        log.info("Updating user with id {}", userId);
+        return ok(userService.updateUser(userId, userPatchRequest));
     }
 
 

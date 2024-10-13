@@ -35,13 +35,13 @@ public class User {
     /**
      * The first name of the user.
      */
-    @Column(updatable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String firstName;
 
     /**
      * The last name of the user.
      */
-    @Column(updatable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String lastName;
 
     /**
