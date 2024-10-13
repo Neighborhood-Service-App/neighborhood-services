@@ -53,6 +53,7 @@ public class AddressService {
 
             return addresses.stream()
                     .map(address -> new AddressResponse(
+                            address.getAddressId(),
                             address.getAddress(),
                             address.getCity(),
                             address.getPostalCode(),
