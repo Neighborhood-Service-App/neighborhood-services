@@ -2,6 +2,7 @@ package com.neighborhoodservice.user.controller;
 
 import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
 import com.neighborhoodservice.user.dto.AddressPatchRequest;
+import com.neighborhoodservice.user.dto.AddressResponse;
 import com.neighborhoodservice.user.service.AddressService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -30,7 +32,7 @@ public class AddressController {
     ) throws Exception {
 
 //        Authorization check
-        if (!JWTUtils.getUserIdFromToken(token).equals(userId)) {
+        if (authorizeUser(userId, token)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .build();
         }
@@ -40,5 +42,33 @@ public class AddressController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .build();
     }
+    
+    @GetMapping
+    public ResponseEntity<List<AddressResponse>> getAllAddresses(
+            @PathVariable UUID userId,
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
+
+//        Authorization check
+        if (!authorizeUser(userId, token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .build();
+        }
+
+        log.info("Getting all addresses for user with id {}", userId);
+        return ResponseEntity.ok(addressService.getAllAddresses(userId));
+
+    }
+
+
+
+
+    private boolean authorizeUser(UUID userId, String token) throws Exception {
+        if (JWTUtils.getUserIdFromToken(token).equals(userId)) {
+            return true;
+        }
+        return false;
+    }
+
 
 }
