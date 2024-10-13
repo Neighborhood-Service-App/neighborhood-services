@@ -1,7 +1,8 @@
 package com.neighborhoodservice.user.controller;
 
 import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
-import com.neighborhoodservice.user.dto.RegisterDto;
+import com.neighborhoodservice.user.dto.RegisterRequest;
+import com.neighborhoodservice.user.dto.UserResponse;
 import com.neighborhoodservice.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,19 +25,26 @@ public class UserController {
     private final JWTUtils JWTUtils;
 
     @PostMapping
-    public ResponseEntity<UUID> createUser(@RequestBody @Valid RegisterDto registerDto,
+    public ResponseEntity<UUID> createUser(@RequestBody @Valid RegisterRequest registerRequest,
                                          @RequestHeader("Authorization") String token
     ) throws Exception {
         if (!JWTUtils.hasAdminRole(token)){
             return ResponseEntity.status(403).build();
         }
-       return ResponseEntity.ok(userService.registerUser(registerDto));
+       return ResponseEntity.ok(userService.registerUser(registerRequest));
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<?> getUser(@PathVariable UUID userId) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable UUID userId) {
         log.info("Getting user with id {}", userId);
         return ok(userService.getUserById(userId));
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<UUID> deleteUser(@PathVariable UUID userId) {
+        log.info("Deleting user with id {}", userId);
+        userService.deleteUser(userId);
+        return ResponseEntity.ok().build();
     }
 
 

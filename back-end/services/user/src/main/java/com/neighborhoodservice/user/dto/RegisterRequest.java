@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record RegisterDto(
+public record RegisterRequest(
 
         @NotNull(message = "Id cannot be blank")
         UUID id,
