@@ -1,13 +1,18 @@
 package com.neighborhoodservice.user.model;
 
 
-import com.neighborhoodservice.user.validation.ValidPhoneNumber;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * The user entity.
@@ -15,9 +20,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 @Entity
+@Builder
 @Table(name = "users")
 public class User {
 
@@ -25,20 +29,19 @@ public class User {
      * The unique identifier for the user.
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
-    private Long userId;
+    private UUID userId;
 
     /**
      * The first name of the user.
      */
-    @Column(nullable = false, updatable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String firstName;
 
     /**
      * The last name of the user.
      */
-    @Column(nullable = false, updatable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String lastName;
 
     /**
@@ -51,19 +54,20 @@ public class User {
     /**
      * The phone number of the user.
      */
-    @Column(nullable = false, length = 13)
-    @ValidPhoneNumber
+    @Column(length = 13)
+    @Pattern(regexp = "^\\+?3?8?(0\\d{9})$", message = "Invalid phone number format")
     private String phoneNumber;
 
     /**
-     * The password of the user.
+     * About section of user
      */
-    @Column(nullable = false, length = 255)
-    private String password;
+    @Column(length = 255)
+    private String about;
 
     /**
      * The timestamp when the user was created. It is set automatically when a new user is created.
      */
+    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
@@ -71,6 +75,7 @@ public class User {
     /**
      * The timestamp when the user was last updated. It is set automatically when a user is updated.
      */
+    @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime lastUpdatedAt;
 
@@ -83,19 +88,9 @@ public class User {
     /**
      * The list of addresses associated with the user.
      */
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Address> addresses;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        lastUpdatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        lastUpdatedAt = LocalDateTime.now();
-    }
+    private List<Address> addresses = new ArrayList<>();
 
 
 }
