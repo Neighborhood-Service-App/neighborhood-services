@@ -26,13 +26,16 @@ public class UserController {
     private final JWTUtils JWTUtils;
 
     @PostMapping
-    public ResponseEntity<UUID> createUser(@RequestBody @Valid RegisterRequest registerRequest,
-                                         @RequestHeader("Authorization") String token
+    public ResponseEntity<UUID> createUser(
+            @RequestBody @Valid RegisterRequest registerRequest,
+            @RequestHeader("Authorization") String token
     ) throws Exception {
+
         if (!JWTUtils.hasAdminRole(token)){
             return ResponseEntity.status(403).build();
         }
        return ok(userService.registerUser(registerRequest));
+
     }
 
     @GetMapping("/{userId}")
@@ -41,8 +44,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<UUID> deleteUser(@PathVariable UUID userId,
-                                           @RequestHeader("Authorization") String token
+    public ResponseEntity<UUID> deleteUser(
+            @PathVariable UUID userId,
+            @RequestHeader("Authorization") String token
     )throws Exception {
 
         if (!JWTUtils.hasAdminRole(token)){
@@ -54,11 +58,18 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable UUID userId,
-                                           @RequestBody @Valid UserPatchRequest userPatchRequest
-    ) {
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable UUID userId,
+            @RequestBody @Valid UserPatchRequest userPatchRequest,
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
+
+        if (!JWTUtils.getUserIdFromToken(token).equals(userId)){
+            return ResponseEntity.status(403).build();
+        }
         log.info("Updating user with id {}", userId);
         return ok(userService.updateUser(userId, userPatchRequest));
+
     }
 
 

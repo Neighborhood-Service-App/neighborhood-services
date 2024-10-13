@@ -76,4 +76,15 @@ public class Address {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean isDefault = false;
 
+    public Address (User user, String address, String city, String postalCode, BigDecimal latitude, BigDecimal longitude, AddressType addressType, boolean isDefault) {
+        this.user = user;
+        this.address = address;
+        this.city = city;
+        this.postalCode = postalCode;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.addressType = addressType;
+        this.isDefault = isDefault;
+    }
+
 }

@@ -27,7 +27,7 @@ public class UserService {
     public UUID registerUser(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.email()) || userRepository.existsById(UUID.fromString(request.id()))) {
-            throw new ResourceAlreadyExistsException("User with email " + request.email() + " already exists");
+            throw new ResourceAlreadyExistsException("User with email " + request.email() + " or id " + request.id() +" already exists");
         }
 
         User user = userMapper.toUser(request);
@@ -38,6 +38,7 @@ public class UserService {
     }
 
     public UserResponse getUserById(UUID userId) {
+//        TODO: Add information about the user's ratings and jobs(OpenFeign)
         return userRepository.findById(userId)
                 .map(userMapper::fromUser)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
@@ -45,8 +46,6 @@ public class UserService {
 
     @Transactional
     public UUID deleteUser(UUID userId) {
-
-
 
         User user = userRepository.findById(userId)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));

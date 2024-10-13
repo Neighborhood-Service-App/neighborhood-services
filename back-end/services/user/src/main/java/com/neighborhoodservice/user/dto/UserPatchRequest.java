@@ -1,7 +1,7 @@
 package com.neighborhoodservice.user.dto;
 
-import com.neighborhoodservice.user.model.Address;
 import jakarta.persistence.Column;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Length;
 
@@ -21,8 +21,8 @@ public record UserPatchRequest(
         @Length(min = 1, max = 255, message = "Last name must be between 1 and 100 characters")
         String about,
 
-//        @Valid
-        List<Address> addresses,
+        @Valid
+        List<AddressPatchRequest> addresses,
 
 //        For now, the image upload functionality is just a String
         String imgUrl
