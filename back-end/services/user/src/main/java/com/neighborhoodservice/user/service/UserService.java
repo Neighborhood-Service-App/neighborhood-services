@@ -27,7 +27,7 @@ public class UserService {
     public UUID registerUser(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.email()) || userRepository.existsById(UUID.fromString(request.id()))) {
-            throw new ResourceAlreadyExistsException("User with email " + request.email() + " already exists");
+            throw new ResourceAlreadyExistsException("User with email " + request.email() + " or id " + request.id() +" already exists");
         }
 
         User user = userMapper.toUser(request);
