@@ -37,6 +37,7 @@ public class GeocodingService {
                 return Map.of("lat", lat, "lng", lng);
             }
         }
+        log.error("Failed to retrieve coordinates for address {}", address);
         throw new RuntimeException("Failed to retrieve coordinates for the given address.");
     }
 
