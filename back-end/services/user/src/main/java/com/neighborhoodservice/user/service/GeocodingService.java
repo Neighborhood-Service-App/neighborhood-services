@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +17,7 @@ public class GeocodingService {
 
     private String GOOGLE_API_KEY = System.getenv("GOOGLE_GEOCODING_API_KEY");
 
-    public Map<String, BigDecimal> getCoordinates(String address) {
+    public Map<String, Double> getCoordinates(String address) {
 
         Map<String, Object> response = googleGeocodingClient.getCoordinates(address, GOOGLE_API_KEY);
 
@@ -30,8 +29,8 @@ public class GeocodingService {
                 Map<String, Object> location = (Map<String, Object>) geometry.get("location");
 
                 // Extract latitude and longitude
-                BigDecimal lat = (BigDecimal) location.get("lat");
-                BigDecimal lng = (BigDecimal) location.get("lng");
+                Double lat = (Double) location.get("lat");
+                Double lng = (Double) location.get("lng");
 
                 log.info("Successfully retrieved location! Coordinates for address {} are lat: {}, lng: {}", address, lat, lng);
                 return Map.of("lat", lat, "lng", lng);

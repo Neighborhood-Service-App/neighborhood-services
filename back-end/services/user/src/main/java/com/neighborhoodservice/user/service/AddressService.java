@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -48,10 +47,10 @@ public class AddressService {
             }
         }
 
-        Map<String, BigDecimal> coordinates = geocodingService
+        Map<String, Double> coordinates = geocodingService
                 .getCoordinates(addressPatchRequest.address() + ", " + addressPatchRequest.city() + ", " + "Ukraine" + ", " + addressPatchRequest.postalCode());
-        BigDecimal lat = coordinates.get("lat");
-        BigDecimal lng = coordinates.get("lng");
+        Double lat = coordinates.get("lat");
+        Double lng = coordinates.get("lng");
 
         // Add address to the user
         Address address = new Address(

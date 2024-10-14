@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.math.BigDecimal;
-
 /**
  * The address entity. Used for location of the job and calculation of the distance between the job and the user.
  */
@@ -54,14 +52,14 @@ public class Address {
     /**
      * The latitude of the address.
      */
-    @Column(precision = 9, scale = 6)
-    private BigDecimal latitude;
+    @Column
+    private Double latitude;
 
     /**
      * The longitude of the address.
      */
-    @Column(precision = 9, scale = 6)
-    private BigDecimal longitude;
+    @Column
+    private Double longitude;
 
     /**
      * The type of the address. User can have 3 addresses at most(HOME, WORK, OTHER).
@@ -76,7 +74,7 @@ public class Address {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean isDefault = false;
 
-    public Address (User user, String address, String city, String postalCode, BigDecimal latitude, BigDecimal longitude, AddressType addressType, boolean isDefault) {
+    public Address (User user, String address, String city, String postalCode, Double latitude, Double longitude, AddressType addressType, boolean isDefault) {
         this.user = user;
         this.address = address;
         this.city = city;
