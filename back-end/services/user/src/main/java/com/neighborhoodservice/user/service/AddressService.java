@@ -3,6 +3,7 @@ package com.neighborhoodservice.user.service;
 import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
 import com.neighborhoodservice.user.dto.AddressPatchRequest;
 import com.neighborhoodservice.user.dto.AddressResponse;
+import com.neighborhoodservice.user.exception.ResourceAlreadyExistsException;
 import com.neighborhoodservice.user.exception.ResourceNotFoundException;
 import com.neighborhoodservice.user.model.Address;
 import com.neighborhoodservice.user.model.User;
@@ -28,11 +29,22 @@ public class AddressService {
     private final AddressRepository addressRepository;
     private final JWTUtils JWTUtils;
 
-    public void addAddress(UUID userId, AddressPatchRequest addressPatchRequest) {
+    public ResponseEntity<HttpStatus> addAddress(UUID userId, AddressPatchRequest addressPatchRequest) {
 
 //        Check if user exists
         User user = userRepository.findById(userId)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
+
+//        Add logic for checking if user has an address with the same address type or already 3 addresses
+        List<Address> addresses = addressRepository.findAllByUser(user);
+        if (addresses.size() >= 3) {
+            throw new ResourceAlreadyExistsException("User with id " + userId + " already has 3 addresses");
+        }
+        for (Address address : addresses) {
+            if (address.getAddressType().equals(addressPatchRequest.addressType())) {
+                throw new ResourceAlreadyExistsException("User with id " + userId + " already has an address with type " + addressPatchRequest.addressType());
+            }
+        }
 
         // Add address to the user
         Address address = new Address(
@@ -47,7 +59,10 @@ public class AddressService {
                 addressPatchRequest.isDefault()
         );
 
+//        Save address to the database
         addressRepository.save(address);
+        return ResponseEntity.accepted()
+                .build();
     }
 
 
@@ -104,4 +119,6 @@ public class AddressService {
         }
         return false;
     }
+
+
 }

@@ -37,10 +37,10 @@ public class AddressController {
                     .build();
         }
 
-        addressService.addAddress(userId, addressPatchRequest);
+        ResponseEntity<HttpStatus> result = addressService.addAddress(userId, addressPatchRequest);
+
         log.info("New address added to user with id {}", userId);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .build();
+        return result;
     }
     
     @GetMapping
@@ -71,6 +71,8 @@ public class AddressController {
         return addressService.deleteAddressById(userId, addressId, token);
 
     }
+
+//    TODO: Implement update address endpoint
 
 
     /**
