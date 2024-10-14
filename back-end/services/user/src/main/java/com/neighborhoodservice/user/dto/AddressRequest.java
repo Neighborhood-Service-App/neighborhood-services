@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.Length;
 
-public record AddressPatchRequest(
+public record AddressRequest(
 
 
         @Length(min = 1, max = 100, message = "City must be between 1 and 100 characters")

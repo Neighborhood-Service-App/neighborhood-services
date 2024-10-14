@@ -1,7 +1,7 @@
 package com.neighborhoodservice.user.controller;
 
 import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
-import com.neighborhoodservice.user.dto.AddressPatchRequest;
+import com.neighborhoodservice.user.dto.AddressRequest;
 import com.neighborhoodservice.user.dto.AddressResponse;
 import com.neighborhoodservice.user.service.AddressService;
 import jakarta.validation.Valid;
@@ -27,17 +27,11 @@ public class AddressController {
     @PostMapping
     public ResponseEntity<HttpStatus> addAddress(
             @PathVariable UUID userId,
-            @RequestBody @Valid AddressPatchRequest addressPatchRequest,
+            @RequestBody @Valid AddressRequest addressRequest,
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
-//        Authorization check
-        if (!authorizeUser(userId, token)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .build();
-        }
-
-        ResponseEntity<HttpStatus> result = addressService.addAddress(userId, addressPatchRequest);
+        ResponseEntity<HttpStatus> result = addressService.addAddress(userId, addressRequest, token);
 
         log.info("New address added to user with id {}", userId);
         return result;
@@ -49,14 +43,8 @@ public class AddressController {
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
-//        Authorization check
-        if (!authorizeUser(userId, token)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .build();
-        }
-
         log.info("Getting all addresses for user with id {}", userId);
-        return ResponseEntity.ok(addressService.getAllAddresses(userId));
+        return ResponseEntity.ok(addressService.getAllAddresses(userId, token));
 
     }
 
@@ -73,20 +61,17 @@ public class AddressController {
     }
 
 //    TODO: Implement update address endpoint
+    @PatchMapping("/{addressId}")
+    public ResponseEntity<HttpStatus> updateAddress(
+            @PathVariable UUID userId,
+            @PathVariable Long addressId,
+            @RequestBody @Valid AddressRequest addressRequest,
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
 
 
-    /**
-     * Authorize user by checking if the token belongs to the user
-     * @param userId user id
-     * @param token JWT token
-     * @return true if the token belongs to the user
-     * @throws Exception if the token is invalid
-     */
-    private boolean authorizeUser(UUID userId, String token) throws Exception {
-        if (JWTUtils.getUserIdFromToken(token).equals(userId)) {
-            return true;
-        }
-        return false;
+        return addressService.updateAddress(userId, addressId, addressRequest, token);
+
     }
 
 
