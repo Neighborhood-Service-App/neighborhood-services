@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -28,6 +29,7 @@ public class AddressService {
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
     private final JWTUtils JWTUtils;
+    private final GeocodingService geocodingService;
 
     public ResponseEntity<HttpStatus> addAddress(UUID userId, AddressPatchRequest addressPatchRequest) {
 
@@ -46,15 +48,19 @@ public class AddressService {
             }
         }
 
+        Map<String, BigDecimal> coordinates = geocodingService
+                .getCoordinates(addressPatchRequest.address() + ", " + addressPatchRequest.city() + ", " + "Ukraine" + ", " + addressPatchRequest.postalCode());
+        BigDecimal lat = coordinates.get("lat");
+        BigDecimal lng = coordinates.get("lng");
+
         // Add address to the user
         Address address = new Address(
                 user,
                 addressPatchRequest.address(),
                 addressPatchRequest.city(),
                 addressPatchRequest.postalCode(),
-//                TODO: Add logic for computing latitude and longitude(Google Maps API or OpenStreetMap)
-                new BigDecimal("0.0"),
-                new BigDecimal("0.0"),
+                lat,
+                lng,
                 addressPatchRequest.addressType(),
                 addressPatchRequest.isDefault()
         );
