@@ -13,7 +13,6 @@ public record UserResponse(
         String email,
         String phoneNumber,
         String about,
-        List<Address> addresses,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         String imgUrl
