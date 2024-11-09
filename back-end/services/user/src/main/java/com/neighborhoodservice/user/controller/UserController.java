@@ -31,10 +31,9 @@ public class UserController {
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
-        if (!JWTUtils.hasAdminRole(token)){
-            return ResponseEntity.status(403).build();
-        }
-       return ok(userService.registerUser(registerRequest));
+        JWTUtils.hasAdminRole(token);
+
+        return ok(userService.registerUser(registerRequest));
 
     }
 
@@ -49,10 +48,11 @@ public class UserController {
             @RequestHeader("Authorization") String token
     )throws Exception {
 
-        if (!JWTUtils.hasAdminRole(token)){
-            return ResponseEntity.status(403).build();
-        }
+//        Only admin can delete users
+        JWTUtils.hasAdminRole(token);
+
         log.info("Deleting user with id {}", userId);
+
         return ok(userService.deleteUser(userId));
 
     }
@@ -64,10 +64,10 @@ public class UserController {
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
-        if (!JWTUtils.getUserIdFromToken(token).equals(userId)){
-            return ResponseEntity.status(403).build();
-        }
+        JWTUtils.authorizeUser(userId, token);
+
         log.info("Updating user with id {}", userId);
+
         return ok(userService.updateUser(userId, userPatchRequest));
 
     }

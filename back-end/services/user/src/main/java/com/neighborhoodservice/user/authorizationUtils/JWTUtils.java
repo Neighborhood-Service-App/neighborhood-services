@@ -1,5 +1,6 @@
 package com.neighborhoodservice.user.authorizationUtils;
 
+import com.neighborhoodservice.user.exception.AuthorizationException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @Service
 public class JWTUtils {
 
-    private PublicKey getPublicKey() throws Exception {
+    private static PublicKey getPublicKey() throws Exception {
         // Get the public key from the environment variable
         String publicKeyPem = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsXguwWMRONpFl6YnI12KbFSQa9TiPZ30c+WM34QvefxoCR8XuxrQAhLwh8N1osYB1ueq8im8rMeTxEwpC4ndNjhLUpV7kHDZC08+AtDMoEcsF+ErRGl2ltAqJetdNBdg31BJeQo5IOdfyEjZBt7F7K3B0P1B3WV9uJg8f8p6e7XQjpleBSufcn+EAPaFsl4ObYccXE/FjnU2+DwiwlxNEUGxlKU/PhsVhkcKVwycvD3jhlqpcLQ0cQvFvaGbjpnhsOpU0Kf+1RqQbe7v/yKNjIg6KVv0v+DKBiHOBnhvtAoFubVO9zgtT5VJipLoRDw6MUuOW0Eu31Qf3ObnVKnijwIDAQAB";
 
@@ -32,7 +33,7 @@ public class JWTUtils {
     }
 
     // Decode and verify JWT
-    public Claims decodeAndVerifyJwt(String jwt) throws Exception {
+    public static Claims decodeAndVerifyJwt(String jwt) throws Exception {
         PublicKey publicKey = getPublicKey();
 
         Claims claims = Jwts
@@ -56,7 +57,7 @@ public class JWTUtils {
         return null;
     }
 
-    public UUID getUserIdFromToken(String token) throws Exception {
+    public static UUID getUserIdFromToken(String token) throws Exception {
         Claims claims = decodeAndVerifyJwt(formatToken(token));
         return UUID.fromString(claims.getSubject());
     }
@@ -72,11 +73,21 @@ public class JWTUtils {
             return true;
         }
 
-        log.info("User does not have admin role!");
-        return false;
+        log.warn("User does not have admin role!");
+        throw new AuthorizationException("User does not have admin role!");
     }
 
-    private String formatToken(String token) {
+
+    public boolean authorizeUser(UUID userId, String token) throws Exception {
+        if (JWTUtils.getUserIdFromToken(token).equals(userId)) {
+            return true;
+        }
+
+        log.warn("User with id {} is not authorized to perform this action", userId);
+        throw new AuthorizationException("User with id " + userId + " is not authorized to perform this action");
+    }
+
+    private static String formatToken(String token) {
         return token.substring(7);
     }
 
