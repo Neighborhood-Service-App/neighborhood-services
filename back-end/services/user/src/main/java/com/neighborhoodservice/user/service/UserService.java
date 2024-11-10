@@ -8,9 +8,14 @@ import com.neighborhoodservice.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 @Slf4j
@@ -21,6 +26,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final UserPatchMapper userPatchMapper;
+    private final AwsService awsService;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucketName;
 
 
     @Transactional
@@ -69,5 +78,25 @@ public class UserService {
     }
 
 
+    public ResponseEntity<String> updateProfilePicture(UUID userId, MultipartFile file) throws IOException {
 
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("File is empty");
+        }
+
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String contentType = file.getContentType();
+        long fileSize = file.getSize();
+        InputStream inputStream = file.getInputStream();
+
+        awsService.uploadFile(bucketName, fileName, fileSize, contentType, inputStream);
+
+        return ResponseEntity.ok().body("File uploaded successfully");
+    }
+
+    public ResponseEntity<String> deleteProfilePicture(UUID userId) {
+
+        awsService.deleteFile(bucketName, userId.toString());
+        return ResponseEntity.ok().body("File deleted successfully");
+    }
 }

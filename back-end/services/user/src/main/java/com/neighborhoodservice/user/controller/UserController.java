@@ -4,14 +4,20 @@ import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
 import com.neighborhoodservice.user.dto.RegisterRequest;
 import com.neighborhoodservice.user.dto.UserPatchRequest;
 import com.neighborhoodservice.user.dto.UserResponse;
+import com.neighborhoodservice.user.service.AwsService;
 import com.neighborhoodservice.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -69,6 +75,31 @@ public class UserController {
         log.info("Updating user with id {}", userId);
 
         return ok(userService.updateUser(userId, userPatchRequest));
+
+    }
+
+
+    @PostMapping("/{userId}/profile-picture")
+    public ResponseEntity<?> uploadFile(
+            @PathVariable("userId") UUID userId,
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
+
+        JWTUtils.authorizeUser(userId, token);
+        return userService.updateProfilePicture(userId, file);
+
+    }
+
+    // Endpoint to delete a file from a bucket
+    @DeleteMapping("/{userId}/profile-picture")
+    public ResponseEntity<?> deleteFile(
+            @PathVariable("userId") UUID userId,
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
+
+        JWTUtils.authorizeUser(userId, token);
+        return userService.deleteProfilePicture(userId);
 
     }
 
