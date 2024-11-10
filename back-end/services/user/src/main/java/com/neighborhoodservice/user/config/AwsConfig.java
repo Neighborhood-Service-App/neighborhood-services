@@ -1,4 +1,4 @@
-package com.neighborhoodservice.user.client;
+package com.neighborhoodservice.user.config;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
