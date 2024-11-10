@@ -4,13 +4,16 @@ import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
 import com.neighborhoodservice.user.dto.RegisterRequest;
 import com.neighborhoodservice.user.dto.UserPatchRequest;
 import com.neighborhoodservice.user.dto.UserResponse;
+import com.neighborhoodservice.user.enumeration.FileType;
 import com.neighborhoodservice.user.service.AwsService;
 import com.neighborhoodservice.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -90,6 +93,7 @@ public class UserController {
         return userService.updateProfilePicture(userId, file);
 
     }
+//    TODO: Add endpoint to get a file from a bucket(or from cache if it exists)
 
     // Endpoint to delete a file from a bucket
     @DeleteMapping("/{userId}/profile-picture")

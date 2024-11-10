@@ -91,12 +91,32 @@ public class UserService {
 
         awsService.uploadFile(bucketName, fileName, fileSize, contentType, inputStream);
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(
+                () -> new ResourceNotFoundException("User with ID " + userId + " not found")
+        );
+
+        user.setImgUrl("https://s3.eu-central-1.amazonaws.com/neighborhood-services/" + userId);
+
+        userRepository.save(user);
+
         return ResponseEntity.ok().body("File uploaded successfully");
+
     }
 
     public ResponseEntity<String> deleteProfilePicture(UUID userId) {
 
         awsService.deleteFile(bucketName, userId.toString());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("User with ID " + userId + " not found")
+       );
+
+        user.setImgUrl(null);
+
+        userRepository.save(user);
+
         return ResponseEntity.ok().body("File deleted successfully");
     }
 }
