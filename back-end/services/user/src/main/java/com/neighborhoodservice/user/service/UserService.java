@@ -84,12 +84,12 @@ public class UserService {
             return ResponseEntity.badRequest().body("File is empty");
         }
 
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+
         String contentType = file.getContentType();
         long fileSize = file.getSize();
         InputStream inputStream = file.getInputStream();
 
-        awsService.uploadFile(bucketName, fileName, fileSize, contentType, inputStream);
+        awsService.uploadFile(bucketName, userId.toString(), fileSize, contentType, inputStream);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(

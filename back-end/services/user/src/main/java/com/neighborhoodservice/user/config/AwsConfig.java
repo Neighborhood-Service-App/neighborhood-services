@@ -28,7 +28,8 @@ public class AwsConfig {
         AWSCredentials credentials = new BasicAWSCredentials(ACCESS_KEY, SECRET_KEY);
 
         // Building Amazon S3 client with specified credentials and region
-        return AmazonS3ClientBuilder.standard()
+        return AmazonS3ClientBuilder
+                .standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withRegion(REGION)
                 .build();
