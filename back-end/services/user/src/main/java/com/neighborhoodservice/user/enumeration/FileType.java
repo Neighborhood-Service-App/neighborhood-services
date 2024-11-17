@@ -3,7 +3,6 @@ package com.neighborhoodservice.user.enumeration;
 import com.neighborhoodservice.user.exception.UnsupportedFileTypeException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.val;
 import org.springframework.http.MediaType;
 
 import java.util.Arrays;
