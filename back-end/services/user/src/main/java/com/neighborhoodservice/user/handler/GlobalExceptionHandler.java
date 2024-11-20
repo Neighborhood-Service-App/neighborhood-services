@@ -1,8 +1,10 @@
 package com.neighborhoodservice.user.handler;
 
 
+import com.neighborhoodservice.user.exception.AuthorizationException;
 import com.neighborhoodservice.user.exception.ResourceAlreadyExistsException;
 import com.neighborhoodservice.user.exception.ResourceNotFoundException;
+import com.neighborhoodservice.user.exception.UnsupportedFileTypeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -35,6 +37,25 @@ public class GlobalExceptionHandler {
                 getResponseStatus(ex).value(),
                 ex.getMessage(),
                 "Resource already exists"
+        );
+        return new ResponseEntity<>(errorResponse, getResponseStatus(ex));
+
+    }
+
+    @ExceptionHandler(UnsupportedFileTypeException.class)
+    public ResponseEntity<String> handleUnsupportedFileTypeException(UnsupportedFileTypeException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(AuthorizationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationException(AuthorizationException ex) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                ex.getMessage(),
+                "Authorization error"
         );
         return new ResponseEntity<>(errorResponse, getResponseStatus(ex));
 

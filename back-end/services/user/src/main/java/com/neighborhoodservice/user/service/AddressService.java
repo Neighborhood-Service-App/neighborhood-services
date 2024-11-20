@@ -39,10 +39,8 @@ public class AddressService {
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
 
 //        Check if user is authorized to add an address
-        if (!authorizeUser(userId, token)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .build();
-        }
+        JWTUtils.authorizeUser(userId, token);
+
 
 //        Add logic for checking if user has an address with the same address type or already 3 addresses
         List<Address> addresses = addressRepository.findAllByUser(user);
@@ -85,11 +83,7 @@ public class AddressService {
             User user = userRepository.findById(userId)
                     .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
 
-            if (!authorizeUser(userId, token)) {
-                return (List<AddressResponse>) ResponseEntity
-                        .status(HttpStatus.FORBIDDEN)
-                        .body(null);
-            }
+            JWTUtils.authorizeUser(userId, token);
 
             List<Address> addresses = addressRepository.findAllByUser(user);
 
@@ -117,10 +111,7 @@ public class AddressService {
             checkIfAddressBelongsToUser(userId, addressId, address);
 
 //            Check if user is authorized to delete the address
-            if (!authorizeUser(userId, token)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .build();
-            }
+           JWTUtils.authorizeUser(userId, token);
 
            addressRepository.deleteById(addressId);
            log.info("Address with id {} deleted", addressId);
@@ -145,10 +136,7 @@ public class AddressService {
         checkIfAddressBelongsToUser(userId, addressId, address);
 
 //            Check if user is authorized to update the address
-        if (!authorizeUser(userId, token)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .build();
-        }
+        JWTUtils.authorizeUser(userId, token);
 
         addressPatchMapper.updateAddressFromDto(addressRequest, address);
         addressRepository.save(address);
@@ -171,13 +159,7 @@ public class AddressService {
         }
     }
     
-    
-    private boolean authorizeUser(UUID userId, String token) throws Exception {
-        if (JWTUtils.getUserIdFromToken(token).equals(userId)) {
-            return true;
-        }
-        return false;
-    }
+
     
     private Address getAddressById(Long addressId) {
         return addressRepository.findById(addressId)

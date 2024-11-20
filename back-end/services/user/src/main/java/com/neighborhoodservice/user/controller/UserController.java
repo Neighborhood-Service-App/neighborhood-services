@@ -4,14 +4,23 @@ import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
 import com.neighborhoodservice.user.dto.RegisterRequest;
 import com.neighborhoodservice.user.dto.UserPatchRequest;
 import com.neighborhoodservice.user.dto.UserResponse;
+import com.neighborhoodservice.user.enumeration.FileType;
+import com.neighborhoodservice.user.service.AwsService;
 import com.neighborhoodservice.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -31,10 +40,9 @@ public class UserController {
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
-        if (!JWTUtils.hasAdminRole(token)){
-            return ResponseEntity.status(403).build();
-        }
-       return ok(userService.registerUser(registerRequest));
+        JWTUtils.hasAdminRole(token);
+
+        return ok(userService.registerUser(registerRequest));
 
     }
 
@@ -49,10 +57,11 @@ public class UserController {
             @RequestHeader("Authorization") String token
     )throws Exception {
 
-        if (!JWTUtils.hasAdminRole(token)){
-            return ResponseEntity.status(403).build();
-        }
+//        Only admin can delete users
+        JWTUtils.hasAdminRole(token);
+
         log.info("Deleting user with id {}", userId);
+
         return ok(userService.deleteUser(userId));
 
     }
@@ -64,11 +73,37 @@ public class UserController {
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
-        if (!JWTUtils.getUserIdFromToken(token).equals(userId)){
-            return ResponseEntity.status(403).build();
-        }
+        JWTUtils.authorizeUser(userId, token);
+
         log.info("Updating user with id {}", userId);
+
         return ok(userService.updateUser(userId, userPatchRequest));
+
+    }
+
+
+    @PostMapping("/{userId}/profile-picture")
+    public ResponseEntity<?> uploadFile(
+            @PathVariable("userId") UUID userId,
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
+
+        JWTUtils.authorizeUser(userId, token);
+        return userService.updateProfilePicture(userId, file);
+
+    }
+//    TODO: Add endpoint to get a file from a bucket(or from cache if it exists)
+
+    // Endpoint to delete a file from a bucket
+    @DeleteMapping("/{userId}/profile-picture")
+    public ResponseEntity<?> deleteFile(
+            @PathVariable("userId") UUID userId,
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
+
+        JWTUtils.authorizeUser(userId, token);
+        return userService.deleteProfilePicture(userId);
 
     }
 
