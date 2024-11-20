@@ -27,6 +27,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserPatchMapper userPatchMapper;
     private final AwsService awsService;
+    private final CloudFrontService cloudFrontService;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
@@ -48,6 +49,7 @@ public class UserService {
 
     public UserResponse getUserById(UUID userId) {
 //        TODO: Add information about the user's ratings and jobs(OpenFeign)
+//        TODO: Generate or  get the signed URL for the profile picture
         return userRepository.findById(userId)
                 .map(userMapper::fromUser)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
@@ -55,7 +57,8 @@ public class UserService {
 
     @Transactional
     public UUID deleteUser(UUID userId) {
-
+//      TODO: Delete all the jobs and ratings associated with the user
+//      TODO: Delete the profile picture from S3
         User user = userRepository.findById(userId)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
 
@@ -119,4 +122,9 @@ public class UserService {
 
         return ResponseEntity.ok().body("File deleted successfully");
     }
+
+    private String generateSignedUrl(String keyName) {
+        return cloudFrontService.generateSignedUrl(keyName, 60);
+    }
+
 }
