@@ -44,7 +44,7 @@ public class CloudFrontService {
 
             // Create the signed URL
             String signedUrl = CloudFrontUrlSigner.getSignedURLWithCannedPolicy(
-                    String.format("https://%s%s", cloudFrontDomain, keyName),
+                    String.format("https://%s/%s", cloudFrontDomain, keyName),
                     keyPairId,
                     privateKey,
                     new Date(expirationTime)

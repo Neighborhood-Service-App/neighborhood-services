@@ -53,19 +53,13 @@ public class UserService {
                 .map(userMapper::fromUser)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
 
-        String signedUrl = generateSignedUrl(userId.toString());
 
-        return new UserResponse(
-                userResponse.userId(),
-                userResponse.firstName(),
-                userResponse.lastName(),
-                userResponse.email(),
-                userResponse.phoneNumber(),
-                userResponse.about(),
-                userResponse.createdAt(),
-                userResponse.updatedAt(),
-                signedUrl
-        );
+        String signedUrl = "";
+        if (awsService.doesObjectExist(bucketName, userId.toString())) {
+            signedUrl = generateSignedUrl(userId.toString());
+        }
+
+        return new UserResponse(userResponse, signedUrl);
     }
 
     @Transactional
@@ -102,7 +96,7 @@ public class UserService {
 
 
         String contentType = file.getContentType();
-        if (!contentType.startsWith("image/") || !contentType.equals("application/pdf")) {
+        if (!(contentType.startsWith("image/") || contentType.equals("application/pdf"))) {
             return ResponseEntity.badRequest().body("Invalid file type. Only images and PDF are allowed.");
         }
 
