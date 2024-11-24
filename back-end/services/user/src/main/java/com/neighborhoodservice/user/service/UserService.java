@@ -49,9 +49,23 @@ public class UserService {
     public UserResponse getUserById(UUID userId) {
 //        TODO: Add information about the user's ratings and jobs(OpenFeign)
 //        TODO: Generate or  get the signed URL for the profile picture
-        return userRepository.findById(userId)
+        UserResponse userResponse = userRepository.findById(userId)
                 .map(userMapper::fromUser)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
+
+        String signedUrl = generateSignedUrl(userId.toString());
+
+        return new UserResponse(
+                userResponse.userId(),
+                userResponse.firstName(),
+                userResponse.lastName(),
+                userResponse.email(),
+                userResponse.phoneNumber(),
+                userResponse.about(),
+                userResponse.createdAt(),
+                userResponse.updatedAt(),
+                signedUrl
+        );
     }
 
     @Transactional
@@ -88,6 +102,10 @@ public class UserService {
 
 
         String contentType = file.getContentType();
+        if (!contentType.startsWith("image/") || !contentType.equals("application/pdf")) {
+            return ResponseEntity.badRequest().body("Invalid file type. Only images and PDF are allowed.");
+        }
+
         long fileSize = file.getSize();
         InputStream inputStream = file.getInputStream();
 
@@ -98,7 +116,6 @@ public class UserService {
                 () -> new ResourceNotFoundException("User with ID " + userId + " not found")
         );
 
-        user.setImgUrl("https://s3.eu-central-1.amazonaws.com/neighborhood-services/" + userId);
 
         userRepository.save(user);
 
@@ -115,7 +132,6 @@ public class UserService {
                         () -> new ResourceNotFoundException("User with ID " + userId + " not found")
        );
 
-        user.setImgUrl(null);
 
         userRepository.save(user);
 
