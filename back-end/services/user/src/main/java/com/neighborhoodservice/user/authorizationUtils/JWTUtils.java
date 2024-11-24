@@ -78,15 +78,6 @@ public class JWTUtils {
     }
 
 
-    public boolean authorizeUser(UUID userId, String token) throws Exception {
-        if (JWTUtils.getUserIdFromToken(token).equals(userId)) {
-            return true;
-        }
-
-        log.warn("User with id {} is not authorized to perform this action", userId);
-        throw new AuthorizationException("User with id " + userId + " is not authorized to perform this action");
-    }
-
     private static String formatToken(String token) {
         return token.substring(7);
     }

@@ -31,7 +31,7 @@ public class AddressController {
     ) throws Exception {
 
         UUID userId = JWTUtils.getUserIdFromToken(token);
-        ResponseEntity<HttpStatus> result = addressService.addAddress(userId, addressRequest, token);
+        ResponseEntity<HttpStatus> result = addressService.addAddress(userId, addressRequest);
 
         log.info("New address added to user with id {}", userId);
         return result;
@@ -44,7 +44,7 @@ public class AddressController {
 
         UUID userId = JWTUtils.getUserIdFromToken(token);
         log.info("Getting all addresses for user with id {}", userId);
-        return ResponseEntity.ok(addressService.getAllAddresses(userId, token));
+        return ResponseEntity.ok(addressService.getAllAddresses(userId));
 
     }
 
@@ -56,7 +56,7 @@ public class AddressController {
     ) throws Exception {
 
         UUID userId = JWTUtils.getUserIdFromToken(token);
-        return addressService.deleteAddressById(userId, addressId, token);
+        return addressService.deleteAddressById(userId, addressId);
 
     }
 
@@ -69,7 +69,7 @@ public class AddressController {
     ) throws Exception {
 
         UUID userId = JWTUtils.getUserIdFromToken(token);
-        return addressService.updateAddress(userId, addressId, addressRequest, token);
+        return addressService.updateAddress(userId, addressId, addressRequest);
 
     }
 
