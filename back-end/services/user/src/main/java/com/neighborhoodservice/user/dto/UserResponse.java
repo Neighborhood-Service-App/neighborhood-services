@@ -1,12 +1,10 @@
 package com.neighborhoodservice.user.dto;
 
-import com.neighborhoodservice.user.model.Address;
-
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 public record UserResponse(
+
         UUID userId,
         String firstName,
         String lastName,
@@ -17,4 +15,15 @@ public record UserResponse(
         LocalDateTime updatedAt,
         String imgUrl
 ) {
+    public UserResponse(UserResponse userResponse, String imgUrl) {
+        this(userResponse.userId(),
+                userResponse.firstName(),
+                userResponse.lastName(),
+                userResponse.email(),
+                userResponse.phoneNumber(),
+                userResponse.about(),
+                userResponse.createdAt(),
+                userResponse.updatedAt(),
+                imgUrl);
+    }
 }

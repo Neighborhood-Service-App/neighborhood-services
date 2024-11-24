@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -27,6 +26,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserPatchMapper userPatchMapper;
     private final AwsService awsService;
+    private final CloudFrontService cloudFrontService;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
@@ -48,14 +48,24 @@ public class UserService {
 
     public UserResponse getUserById(UUID userId) {
 //        TODO: Add information about the user's ratings and jobs(OpenFeign)
-        return userRepository.findById(userId)
+//        TODO: Generate or  get the signed URL for the profile picture
+        UserResponse userResponse = userRepository.findById(userId)
                 .map(userMapper::fromUser)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
+
+
+        String signedUrl = "";
+        if (awsService.doesObjectExist(bucketName, userId.toString())) {
+            signedUrl = generateSignedUrl(userId.toString());
+        }
+
+        return new UserResponse(userResponse, signedUrl);
     }
 
     @Transactional
     public UUID deleteUser(UUID userId) {
-
+//      TODO: Delete all the jobs and ratings associated with the user
+//      TODO: Delete the profile picture from S3
         User user = userRepository.findById(userId)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
 
@@ -86,6 +96,10 @@ public class UserService {
 
 
         String contentType = file.getContentType();
+        if (!(contentType.startsWith("image/") || contentType.equals("application/pdf"))) {
+            return ResponseEntity.badRequest().body("Invalid file type. Only images and PDF are allowed.");
+        }
+
         long fileSize = file.getSize();
         InputStream inputStream = file.getInputStream();
 
@@ -96,7 +110,6 @@ public class UserService {
                 () -> new ResourceNotFoundException("User with ID " + userId + " not found")
         );
 
-        user.setImgUrl("https://s3.eu-central-1.amazonaws.com/neighborhood-services/" + userId);
 
         userRepository.save(user);
 
@@ -113,10 +126,14 @@ public class UserService {
                         () -> new ResourceNotFoundException("User with ID " + userId + " not found")
        );
 
-        user.setImgUrl(null);
 
         userRepository.save(user);
 
         return ResponseEntity.ok().body("File deleted successfully");
     }
+
+    private String generateSignedUrl(String keyName) {
+        return cloudFrontService.generateSignedUrl(keyName, 60);
+    }
+
 }

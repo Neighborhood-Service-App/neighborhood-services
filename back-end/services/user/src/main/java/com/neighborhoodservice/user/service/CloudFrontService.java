@@ -24,10 +24,10 @@ public class CloudFrontService {
     @Value("${aws.cloudfront.private-key}")
     private String privateKeyStr;
 
-    public String generateSignedUrl(String resourcePath, int expiryTimeInMinutes) {
+    public String generateSignedUrl(String keyName, int expiryTimeInMinutes) {
         try {
             // Log the start of the process
-            log.info("CloudFrontService: Generating signed URL for resource: {}", resourcePath);
+            log.info("CloudFrontService: Generating signed URL for resource: {}", keyName);
 
             // Remove the PEM headers and footers from the private key string
             String cleanPemKey = privateKeyStr
@@ -44,7 +44,7 @@ public class CloudFrontService {
 
             // Create the signed URL
             String signedUrl = CloudFrontUrlSigner.getSignedURLWithCannedPolicy(
-                    String.format("https://%s%s", cloudFrontDomain, resourcePath),
+                    String.format("https://%s/%s", cloudFrontDomain, keyName),
                     keyPairId,
                     privateKey,
                     new Date(expirationTime)

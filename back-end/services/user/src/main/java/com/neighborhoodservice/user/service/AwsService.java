@@ -65,4 +65,23 @@ public class AwsService {
         log.info("File deleted from bucket({}): {}", bucketName, keyName);
     }
 
+    /**
+     * Method to check if an object exists in S3 bucket
+     *
+     * @param keyName The S3 object key (file path)
+     * @return boolean indicating whether the object exists in the bucket
+     */
+    public boolean doesObjectExist(String bucketName, String keyName) {
+        try {
+            // Check if the object exists in the S3 bucket
+            s3Client.doesObjectExist(bucketName, keyName);
+            log.info("Object with key '{}' exists in the bucket '{}'.", keyName, bucketName);
+            return true;
+        } catch (Exception e) {
+            // If the object does not exist or other errors occur, log it and return false
+            log.warn("Object with key '{}' does not exist in the bucket '{}'.", keyName, bucketName);
+            return false;
+        }
+    }
+
 }

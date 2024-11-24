@@ -8,6 +8,8 @@ import java.util.UUID;
 @Service
 public class UserMapper {
 
+
+
     public User toUser(RegisterRequest registerRequest) {
         return User.builder()
                 .userId(UUID.fromString(registerRequest.id()))
@@ -26,7 +28,7 @@ public class UserMapper {
                 user.getAbout(),
                 user.getCreatedAt(),
                 user.getLastUpdatedAt(),
-                user.getImgUrl()
+                null
         );
     }
 

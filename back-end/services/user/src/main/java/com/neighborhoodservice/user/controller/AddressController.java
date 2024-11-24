@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/users/{userId}/addresses")
+@RequestMapping("/api/v1/users/addresses")
 @RequiredArgsConstructor
 public class AddressController {
 
@@ -26,12 +26,12 @@ public class AddressController {
 
     @PostMapping
     public ResponseEntity<HttpStatus> addAddress(
-            @PathVariable UUID userId,
             @RequestBody @Valid AddressRequest addressRequest,
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
-        ResponseEntity<HttpStatus> result = addressService.addAddress(userId, addressRequest, token);
+        UUID userId = JWTUtils.getUserIdFromToken(token);
+        ResponseEntity<HttpStatus> result = addressService.addAddress(userId, addressRequest);
 
         log.info("New address added to user with id {}", userId);
         return result;
@@ -39,38 +39,37 @@ public class AddressController {
     
     @GetMapping
     public ResponseEntity<List<AddressResponse>> getAllAddresses(
-            @PathVariable UUID userId,
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
+        UUID userId = JWTUtils.getUserIdFromToken(token);
         log.info("Getting all addresses for user with id {}", userId);
-        return ResponseEntity.ok(addressService.getAllAddresses(userId, token));
+        return ResponseEntity.ok(addressService.getAllAddresses(userId));
 
     }
 
 
     @DeleteMapping("/{addressId}")
     public ResponseEntity<HttpStatus> deleteAddress(
-            @PathVariable UUID userId,
             @PathVariable Long addressId,
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
-        return addressService.deleteAddressById(userId, addressId, token);
+        UUID userId = JWTUtils.getUserIdFromToken(token);
+        return addressService.deleteAddressById(userId, addressId);
 
     }
 
-//    TODO: Implement update address endpoint
+
     @PatchMapping("/{addressId}")
     public ResponseEntity<HttpStatus> updateAddress(
-            @PathVariable UUID userId,
             @PathVariable Long addressId,
             @RequestBody @Valid AddressRequest addressRequest,
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
-
-        return addressService.updateAddress(userId, addressId, addressRequest, token);
+        UUID userId = JWTUtils.getUserIdFromToken(token);
+        return addressService.updateAddress(userId, addressId, addressRequest);
 
     }
 

@@ -32,14 +32,11 @@ public class AddressService {
     private final GeocodingService geocodingService;
     private final AddressPatchMapper addressPatchMapper;
 
-    public ResponseEntity<HttpStatus> addAddress(UUID userId, AddressRequest addressRequest, String token) throws Exception {
+    public ResponseEntity<HttpStatus> addAddress(UUID userId, AddressRequest addressRequest) throws Exception {
 
 //        Check if user exists
         User user = userRepository.findById(userId)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
-
-//        Check if user is authorized to add an address
-        JWTUtils.authorizeUser(userId, token);
 
 
 //        Add logic for checking if user has an address with the same address type or already 3 addresses
@@ -77,13 +74,12 @@ public class AddressService {
     }
 
 
-    public List<AddressResponse> getAllAddresses(UUID userId,String token) throws Exception {
+    public List<AddressResponse> getAllAddresses(UUID userId) throws Exception {
 
 
             User user = userRepository.findById(userId)
                     .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
 
-            JWTUtils.authorizeUser(userId, token);
 
             List<Address> addresses = addressRepository.findAllByUser(user);
 
@@ -99,7 +95,7 @@ public class AddressService {
                     .toList();
     }
 
-    public ResponseEntity<HttpStatus> deleteAddressById(UUID userId, Long addressId, String token) throws Exception {
+    public ResponseEntity<HttpStatus> deleteAddressById(UUID userId, Long addressId) {
 
 //            Check if user exists
             checkIfUserExists(userId);
@@ -109,9 +105,6 @@ public class AddressService {
 
 //            Check if address belongs to the user
             checkIfAddressBelongsToUser(userId, addressId, address);
-
-//            Check if user is authorized to delete the address
-           JWTUtils.authorizeUser(userId, token);
 
            addressRepository.deleteById(addressId);
            log.info("Address with id {} deleted", addressId);
@@ -123,8 +116,7 @@ public class AddressService {
     public ResponseEntity<HttpStatus> updateAddress(
             UUID userId, 
             Long addressId, 
-            AddressRequest addressRequest, 
-            String token) throws Exception {
+            AddressRequest addressRequest) throws Exception {
 
 //            Check if user exists
         checkIfUserExists(userId);
@@ -135,8 +127,6 @@ public class AddressService {
 //            Check if address belongs to the user
         checkIfAddressBelongsToUser(userId, addressId, address);
 
-//            Check if user is authorized to update the address
-        JWTUtils.authorizeUser(userId, token);
 
         addressPatchMapper.updateAddressFromDto(addressRequest, address);
         addressRepository.save(address);

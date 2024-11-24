@@ -79,11 +79,6 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime lastUpdatedAt;
 
-    /**
-     * The URL of the user's profile image. (AWS S3 URL)
-     */
-    @Column(length = 255)
-    private String imgUrl;
 
     /**
      * The list of addresses associated with the user.
