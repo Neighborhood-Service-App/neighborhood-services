@@ -60,7 +60,7 @@ public class AddressController {
 
     }
 
-//    TODO: Implement update address endpoint
+
     @PatchMapping("/{addressId}")
     public ResponseEntity<HttpStatus> updateAddress(
             @PathVariable Long addressId,
