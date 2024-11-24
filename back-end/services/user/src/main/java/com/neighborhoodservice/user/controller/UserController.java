@@ -66,14 +66,13 @@ public class UserController {
 
     }
 
-    @PatchMapping("/{userId}")
+    @PatchMapping("/me")
     public ResponseEntity<UserResponse> updateUser(
-            @PathVariable UUID userId,
             @RequestBody @Valid UserPatchRequest userPatchRequest,
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
-        JWTUtils.authorizeUser(userId, token);
+        UUID userId = JWTUtils.getUserIdFromToken(token);
 
         log.info("Updating user with id {}", userId);
 
@@ -82,27 +81,25 @@ public class UserController {
     }
 
 
-    @PostMapping("/{userId}/profile-picture")
+    @PostMapping("/profile-picture")
     public ResponseEntity<?> uploadFile(
-            @PathVariable("userId") UUID userId,
             @RequestParam("file") MultipartFile file,
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
-        JWTUtils.authorizeUser(userId, token);
+        UUID userId = JWTUtils.getUserIdFromToken(token);
         return userService.updateProfilePicture(userId, file);
 
     }
 //    TODO: Add endpoint to get a file from a bucket(or from cache if it exists)
 
     // Endpoint to delete a file from a bucket
-    @DeleteMapping("/{userId}/profile-picture")
+    @DeleteMapping("/profile-picture")
     public ResponseEntity<?> deleteFile(
-            @PathVariable("userId") UUID userId,
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
-        JWTUtils.authorizeUser(userId, token);
+        UUID userId = JWTUtils.getUserIdFromToken(token);
         return userService.deleteProfilePicture(userId);
 
     }
