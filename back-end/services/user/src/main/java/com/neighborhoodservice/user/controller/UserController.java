@@ -83,7 +83,6 @@ public class UserController {
         return userService.updateProfilePicture(userId, file);
 
     }
-//    TODO: Add endpoint to get a file from a bucket(or from cache if it exists)
 
     // Endpoint to delete a file from a bucket
     @DeleteMapping("/profile-picture")

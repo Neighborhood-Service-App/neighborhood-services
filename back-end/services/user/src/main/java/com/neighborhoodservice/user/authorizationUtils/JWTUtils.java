@@ -3,6 +3,7 @@ package com.neighborhoodservice.user.authorizationUtils;
 import com.neighborhoodservice.user.exception.AuthorizationException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,8 +20,13 @@ import java.util.UUID;
 @Service
 public class JWTUtils {
 
-    @Value("${keycloak.publicKey}")
+
     private static String keycloakPublicKey;
+
+    @PostConstruct
+    public void init() {
+        keycloakPublicKey = System.getenv("KEYCLOAK_PUBLIC_KEY");
+    }
 
     private static PublicKey getPublicKey() throws Exception {
         // Get the public key from the environment variable
