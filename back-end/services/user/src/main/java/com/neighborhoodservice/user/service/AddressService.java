@@ -1,6 +1,5 @@
 package com.neighborhoodservice.user.service;
 
-import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
 import com.neighborhoodservice.user.dto.AddressPatchMapper;
 import com.neighborhoodservice.user.dto.AddressRequest;
 import com.neighborhoodservice.user.dto.AddressResponse;
@@ -17,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -28,7 +28,6 @@ public class AddressService {
     private static final Logger log = LoggerFactory.getLogger(AddressService.class);
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
-    private final JWTUtils JWTUtils;
     private final GeocodingService geocodingService;
     private final AddressPatchMapper addressPatchMapper;
 
@@ -69,12 +68,12 @@ public class AddressService {
 
 //        Save address to the database
         addressRepository.save(address);
-        return ResponseEntity.accepted()
+        return ResponseEntity.created(new URI("/api/v1/users/" + userId + "/addresses/" + address.getAddressId()))
                 .build();
     }
 
 
-    public List<AddressResponse> getAllAddresses(UUID userId) throws Exception {
+    public List<AddressResponse> getAllAddresses(UUID userId) {
 
 
             User user = userRepository.findById(userId)
@@ -108,7 +107,7 @@ public class AddressService {
 
            addressRepository.deleteById(addressId);
            log.info("Address with id {} deleted", addressId);
-           return ResponseEntity.accepted()
+           return ResponseEntity.noContent()
                    .build();
     }
 
@@ -116,7 +115,7 @@ public class AddressService {
     public ResponseEntity<HttpStatus> updateAddress(
             UUID userId, 
             Long addressId, 
-            AddressRequest addressRequest) throws Exception {
+            AddressRequest addressRequest) {
 
 //            Check if user exists
         checkIfUserExists(userId);
