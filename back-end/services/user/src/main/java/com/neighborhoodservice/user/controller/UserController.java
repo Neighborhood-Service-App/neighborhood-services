@@ -5,6 +5,7 @@ import com.neighborhoodservice.user.dto.RegisterRequest;
 import com.neighborhoodservice.user.dto.UserPatchRequest;
 import com.neighborhoodservice.user.dto.UserResponse;
 import com.neighborhoodservice.user.service.UserService;
+import com.neighborhoodservice.user.service.impl.UserServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

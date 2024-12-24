@@ -4,6 +4,7 @@ import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
 import com.neighborhoodservice.user.dto.AddressRequest;
 import com.neighborhoodservice.user.dto.AddressResponse;
 import com.neighborhoodservice.user.service.AddressService;
+import com.neighborhoodservice.user.service.impl.AddressServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
