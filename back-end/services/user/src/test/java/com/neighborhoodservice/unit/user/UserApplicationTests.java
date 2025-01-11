@@ -1,4 +1,4 @@
-package com.neighborhoodservice.user;
+package com.neighborhoodservice.unit.user;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

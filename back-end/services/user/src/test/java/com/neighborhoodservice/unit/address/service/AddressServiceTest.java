@@ -1,4 +1,4 @@
-package com.neighborhoodservice.address.service;
+package com.neighborhoodservice.unit.address.service;
 
 import com.neighborhoodservice.user.dto.AddressPatchMapper;
 import com.neighborhoodservice.user.dto.AddressRequest;

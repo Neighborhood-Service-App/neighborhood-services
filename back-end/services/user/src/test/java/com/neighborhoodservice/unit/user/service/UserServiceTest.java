@@ -1,10 +1,12 @@
-package com.neighborhoodservice.user.service;
+package com.neighborhoodservice.unit.user.service;
 
 import com.neighborhoodservice.user.dto.*;
 import com.neighborhoodservice.user.exception.ResourceAlreadyExistsException;
 import com.neighborhoodservice.user.exception.ResourceNotFoundException;
 import com.neighborhoodservice.user.model.User;
 import com.neighborhoodservice.user.repository.UserRepository;
+import com.neighborhoodservice.user.service.AwsService;
+import com.neighborhoodservice.user.service.CloudFrontService;
 import com.neighborhoodservice.user.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

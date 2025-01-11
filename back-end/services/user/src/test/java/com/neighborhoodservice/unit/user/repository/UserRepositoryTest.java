@@ -1,7 +1,8 @@
-package com.neighborhoodservice.user.repository;
+package com.neighborhoodservice.unit.user.repository;
 
 
 import com.neighborhoodservice.user.model.User;
+import com.neighborhoodservice.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeAll;
