@@ -16,9 +16,7 @@ public record UserPatchRequest(
         String phoneNumber,
 
         @Length(min = 1, max = 255, message = "Last name must be between 1 and 100 characters")
-        String about,
+        String about
 
-//        For now, the image upload functionality is just a String
-        String imgUrl
 ) {
 }
