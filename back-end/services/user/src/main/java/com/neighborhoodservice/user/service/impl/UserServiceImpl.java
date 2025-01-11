@@ -55,16 +55,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse getUserById(UUID userId) {
 //        TODO: Add information about the user's ratings and jobs(OpenFeign)
+        log.info("Fetching user with id {}", userId);
+
+//        Get the user from the database
         UserResponse userResponse = userRepository.findById(userId)
                 .map(userMapper::fromUser)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
 
-
+//      Generate a signed URL for the user's profile picture
         String signedUrl = "";
         if (awsService.doesObjectExist(bucketName, userId.toString())) {
             signedUrl = generateSignedUrl(userId.toString());
         }
 
+//        Return the user response with the signed URL of the user's profile picture
         return new UserResponse(userResponse, signedUrl);
     }
 
