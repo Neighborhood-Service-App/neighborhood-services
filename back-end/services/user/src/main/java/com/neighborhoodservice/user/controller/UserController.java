@@ -29,11 +29,9 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UUID> createUser(
-            @RequestBody @Valid RegisterRequest registerRequest,
-            @RequestHeader("Authorization") String token
+            @RequestBody @Valid RegisterRequest registerRequest
     ) throws Exception {
 
-        JWTUtils.hasAdminRole(token);
 
         return ok(userService.registerUser(registerRequest));
 
