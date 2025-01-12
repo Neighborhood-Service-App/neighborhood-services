@@ -7,10 +7,13 @@ import com.neighborhoodservice.user.model.User;
 import com.neighborhoodservice.user.repository.UserRepository;
 import com.neighborhoodservice.user.service.AwsService;
 import com.neighborhoodservice.user.service.CloudFrontService;
+import com.neighborhoodservice.user.service.KeycloakService;
 import com.neighborhoodservice.user.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,24 +29,27 @@ import static org.mockito.Mockito.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
+@ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
 class UserServiceTest {
 
-    @Mock
+    @Mock(lenient = true)
     private UserRepository userRepository;
 
-    @Mock
+    @Mock(lenient = true)
     private AwsService awsService;
 
-    @Mock
+    @Mock(lenient = true)
     private CloudFrontService cloudFrontService;
 
-    @Mock
+    @Mock(lenient = true)
     UserMapper userMapper;
 
-    @Mock
+    @Mock(lenient = true)
     UserPatchMapper userPatchMapper;
+
+    @Mock(lenient = true)
+    private KeycloakService keyCloakService;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -51,15 +57,11 @@ class UserServiceTest {
     private User testUser;
     private RegisterRequest registerRequest;
     private UserPatchRequest userPatchRequest;
-    private UserResponse userResponse;
-
-
 
 
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
 
         // Setup a test user
         testUser = new User();
@@ -69,7 +71,7 @@ class UserServiceTest {
         testUser.setLastName("Doe");
 
         // Setup register request
-        registerRequest = new RegisterRequest(UUID.randomUUID().toString(), "test@example.com");
+        registerRequest = new RegisterRequest("John", "Doe", "password", "test@example.com");
 
         // Setup user patch request
         userPatchRequest = new UserPatchRequest("newFirstName", "newLastName", "+380675757500", "Simple about");
@@ -77,20 +79,26 @@ class UserServiceTest {
 
     @Test
     void registerUser_Success() {
-        // Arrange
+        // Arrange: Mock the repository and keycloak service responses
         when(userRepository.existsByEmail(registerRequest.email())).thenReturn(false);
-        when(userRepository.existsById(UUID.fromString(registerRequest.id()))).thenReturn(false);
-        when(userMapper.toUser(registerRequest)).thenReturn(testUser);
+
+        doAnswer(invocation -> "admin-jwt").when(keyCloakService).getAdminJwtToken(null, null, null);
+
+        when(keyCloakService.getUserIdByEmail(anyString(), anyString())).thenReturn(UUID.randomUUID().toString());
+        doNothing().when(keyCloakService).createUser(anyString(), any(RegisterKeycloakRequest.class));
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        // Act
-        UUID result = userService.registerUser(registerRequest);
+        // Act: Call the registerUser method
+        UUID userId = userService.registerUser(registerRequest);
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(testUser.getUserId(), result);
+        // Assert: Verify that everything was called the correct number of times
+        assertNotNull(userId);
         verify(userRepository, times(1)).save(any(User.class));
+        verify(keyCloakService, times(1)).getAdminJwtToken(null, null, null);
+        verify(keyCloakService, times(1)).createUser(anyString(), any(RegisterKeycloakRequest.class));
+        verify(keyCloakService, times(1)).getUserIdByEmail(anyString(), anyString());
     }
+
 
     @Test
     void registerUser_EmailAlreadyExists() {
@@ -120,8 +128,6 @@ class UserServiceTest {
                 ""
         );
         when(userMapper.fromUser(testUser)).thenReturn(userResponse);
-
-
 
         // Act
         UserResponse result = userService.getUserById(testUser.getUserId());
@@ -179,8 +185,7 @@ class UserServiceTest {
                 userPatchRequest.about(),
                 testUser.getCreatedAt(),
                 testUser.getLastUpdatedAt(),
-                // Mock the addresses field as empty or null (based on your actual model)
-                new ArrayList<>() // Empty list to avoid the addresses mismatch
+                new ArrayList<>()
         );
 
         // Mock the findById method to return the original test user
@@ -188,7 +193,6 @@ class UserServiceTest {
 
         // Mock the updateUserFromDto method to update the test user fields
         doAnswer(invocation -> {
-            // Simulate the update of user fields using the patch request
             UserPatchRequest patchRequest = invocation.getArgument(0);
             testUser.setFirstName(patchRequest.firstName());
             testUser.setLastName(patchRequest.lastName());
@@ -211,7 +215,7 @@ class UserServiceTest {
                         updatedUser.getAbout(),
                         updatedUser.getCreatedAt(),
                         updatedUser.getLastUpdatedAt(),
-                        "" // Assuming an empty profile URL for simplicity
+                        ""
                 )
         );
 
@@ -219,26 +223,16 @@ class UserServiceTest {
         UserResponse result = userService.updateUser(testUser.getUserId(), userPatchRequest);
 
         // Assert
-        // Ensure the result is not null
         assertNotNull(result);
+        assertEquals(updatedUser.getUserId(), result.userId());
+        assertEquals(userPatchRequest.firstName(), result.firstName());
+        assertEquals(userPatchRequest.lastName(), result.lastName());
+        assertEquals(userPatchRequest.phoneNumber(), result.phoneNumber());
+        assertEquals(userPatchRequest.about(), result.about());
 
-        // Assert that the fields in the response match the updated values
-        assertEquals(updatedUser.getUserId(), result.userId());  // Ensure the userId is correct
-        assertEquals(userPatchRequest.firstName(), result.firstName());  // Ensure the first name is updated
-        assertEquals(userPatchRequest.lastName(), result.lastName());  // Ensure the last name is updated
-        assertEquals(userPatchRequest.phoneNumber(), result.phoneNumber());  // Ensure the phone number is updated
-        assertEquals(userPatchRequest.about(), result.about());  // Ensure the about field is updated
-
-        // Verify save was called with the updated user object
-        verify(userRepository, times(1)).save(eq(updatedUser));  // Verify save was called with the updated user
-
-        // Verify the updateUserFromDto method was called with the correct arguments
-        verify(userPatchMapper, times(1)).updateUserFromDto(userPatchRequest, testUser);  // Ensure patching method was invoked
+        verify(userRepository, times(1)).save(eq(updatedUser));
+        verify(userPatchMapper, times(1)).updateUserFromDto(userPatchRequest, testUser);
     }
-
-
-
-
 
     @Test
     void updateUser_UserNotFound() {

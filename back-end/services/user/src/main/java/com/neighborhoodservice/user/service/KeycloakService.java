@@ -4,10 +4,10 @@ import com.neighborhoodservice.user.dto.RegisterKeycloakRequest;
 
 public interface KeycloakService {
 
-    public String getAdminJwtToken(String clientId, String username, String password);
+    String getAdminJwtToken(String clientId, String username, String password);
 
-    public void createUser(String token, RegisterKeycloakRequest registerKeycloakRequest);
+    void createUser(String token, RegisterKeycloakRequest registerKeycloakRequest);
 
-    public String getUserIdByEmail(String email, String token);
+    String getUserIdByEmail(String email, String token);
 
 }

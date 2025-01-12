@@ -7,18 +7,20 @@ import com.neighborhoodservice.user.model.User;
 import com.neighborhoodservice.user.repository.UserRepository;
 import com.neighborhoodservice.user.service.AwsService;
 import com.neighborhoodservice.user.service.CloudFrontService;
+import com.neighborhoodservice.user.service.KeycloakService;
 import com.neighborhoodservice.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -32,25 +34,65 @@ public class UserServiceImpl implements UserService {
     private final UserPatchMapper userPatchMapper;
     private final AwsService awsService;
     private final CloudFrontService cloudFrontService;
+    private final KeycloakService keyCloakService;
+
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
+    @Value("${keycloak.admin.username}")
+    private String adminUsername;
 
+    @Value("${keycloak.admin.password}")
+    private String adminPassword;
+
+    @Value("${keycloak.admin.client-id}")
+    private String clientId;
+
+
+//  TODO : Enable account in keycloak
     @Override
     @Transactional
     public UUID registerUser(RegisterRequest request) {
 
-        if (userRepository.existsByEmail(request.email()) || userRepository.existsById(UUID.fromString(request.id()))) {
-            throw new ResourceAlreadyExistsException("User with email " + request.email() + " or id " + request.id() +" already exists");
+        if ( userRepository.existsByEmail(request.email()) ) {
+            throw new ResourceAlreadyExistsException("User with email " + request.email()+ " already exists");
         }
 
-        User user = userMapper.toUser(request);
+        log.debug("Keycloak Info: clientId:{}, adminUsername:{}, adminPassword:{}", clientId, adminUsername, adminPassword);
 
+        String adminJWT = keyCloakService.getAdminJwtToken(clientId, adminUsername, adminPassword);
+        log.debug("Got the admin JWT");
+
+        RegisterKeycloakRequest registerKeycloakRequest = new RegisterKeycloakRequest(
+                true,
+                request.firstName(),
+                request.lastName(),
+                request.email(),
+                List.of(new RegisterKeycloakRequest.Credentials(request.password()))
+        );
+
+        keyCloakService.createUser(adminJWT, registerKeycloakRequest);
+        log.info("Registered user with email {} in keycloak successfully", request.email());
+
+//      Get the user's generated UUID from keycloak
+        String userId = keyCloakService.getUserIdByEmail(request.email(), adminJWT);
+
+        User user = User.builder()
+                .userId(UUID.fromString(userId))
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .email(request.email())
+                .build();
+
+        log.info("Retrieved UUID for user with email {}", request.email());
+
+//        Save the user to the database
         userRepository.save(user);
         log.info("User with id {} has been registered", user.getUserId());
         return user.getUserId();
     }
+
 
     @Override
     public UserResponse getUserById(UUID userId) {
@@ -62,6 +104,7 @@ public class UserServiceImpl implements UserService {
                 .map(userMapper::fromUser)
                 .orElseThrow( () -> new ResourceNotFoundException("User with id " + userId + " not found"));
 
+//        TODO : Add caching for the user's profile picture
 //      Generate a signed URL for the user's profile picture
         String signedUrl = "";
         if (awsService.doesObjectExist(bucketName, userId.toString())) {
