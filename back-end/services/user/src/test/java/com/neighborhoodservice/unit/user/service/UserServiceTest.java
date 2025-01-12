@@ -82,7 +82,7 @@ class UserServiceTest {
         // Arrange: Mock the repository and keycloak service responses
         when(userRepository.existsByEmail(registerRequest.email())).thenReturn(false);
 
-        doAnswer(invocation -> "admin-jwt").when(keyCloakService).getAdminJwtToken(null, null, null);
+        doAnswer(invocation -> "admin-jwt").when(keyCloakService).getAdminJwtToken();
 
         when(keyCloakService.getUserIdByEmail(anyString(), anyString())).thenReturn(UUID.randomUUID().toString());
         doNothing().when(keyCloakService).createUser(anyString(), any(RegisterKeycloakRequest.class));
@@ -94,7 +94,7 @@ class UserServiceTest {
         // Assert: Verify that everything was called the correct number of times
         assertNotNull(userId);
         verify(userRepository, times(1)).save(any(User.class));
-        verify(keyCloakService, times(1)).getAdminJwtToken(null, null, null);
+        verify(keyCloakService, times(1)).getAdminJwtToken();
         verify(keyCloakService, times(1)).createUser(anyString(), any(RegisterKeycloakRequest.class));
         verify(keyCloakService, times(1)).getUserIdByEmail(anyString(), anyString());
     }
