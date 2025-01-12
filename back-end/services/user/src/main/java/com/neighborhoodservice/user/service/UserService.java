@@ -1,5 +1,6 @@
 package com.neighborhoodservice.user.service;
 
+import com.neighborhoodservice.user.dto.LoginRequest;
 import com.neighborhoodservice.user.dto.RegisterRequest;
 import com.neighborhoodservice.user.dto.UserPatchRequest;
 import com.neighborhoodservice.user.dto.UserResponse;
@@ -25,4 +26,6 @@ public interface UserService {
     ResponseEntity<String> updateProfilePicture(UUID userId, MultipartFile file) throws IOException;
 
     ResponseEntity<String> deleteProfilePicture(UUID userId);
+
+    Object login(LoginRequest loginRequest);
 }

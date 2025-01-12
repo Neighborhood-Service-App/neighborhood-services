@@ -2,10 +2,12 @@ package com.neighborhoodservice.user.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neighborhoodservice.user.dto.LoginRequest;
 import com.neighborhoodservice.user.dto.RegisterKeycloakRequest;
 import com.neighborhoodservice.user.service.KeycloakService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -19,14 +21,23 @@ public class KeyCloakServiceImpl implements KeycloakService {
 
     private final RestTemplate restTemplate;
 
-    public String getAdminJwtToken(String clientId, String username, String password) {
+    @Value("${keycloak.admin.username}")
+    private String adminUsername;
+
+    @Value("${keycloak.admin.password}")
+    private String adminPassword;
+
+    @Value("${keycloak.admin.client-id}")
+    private String clientId;
+
+    public String getAdminJwtToken() {
         String url = "http://localhost:9090/realms/neighborhood-services-realm/protocol/openid-connect/token";
 
         // Prepare the form data (application/x-www-form-urlencoded)
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("client_id", clientId);
-        formData.add("username", username);
-        formData.add("password", password);
+        formData.add("username", adminUsername);
+        formData.add("password", adminPassword);
         formData.add("grant_type", "password");
 
         // Set headers
@@ -35,6 +46,8 @@ public class KeyCloakServiceImpl implements KeycloakService {
 
         // Create the HTTP request
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(formData, headers);
+
+        log.debug("Keycloak Info: clientId:{}, adminUsername:{}, adminPassword:{}", clientId, adminUsername, adminPassword);
 
         try {
             // Make the POST request
@@ -58,12 +71,12 @@ public class KeyCloakServiceImpl implements KeycloakService {
         }
     }
 
-    public void createUser(String token, RegisterKeycloakRequest registerKeycloakRequest) {
+    public void createUser(String adminJWT, RegisterKeycloakRequest registerKeycloakRequest) {
         String url = "http://localhost:9090/admin/realms/neighborhood-services-realm/users";
 
         // Set headers
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
+        headers.setBearerAuth(adminJWT);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
 
@@ -85,7 +98,7 @@ public class KeyCloakServiceImpl implements KeycloakService {
             if (response.getStatusCode() == HttpStatus.CREATED) {
                 log.info("User created successfully!");
             } else {
-                log.info("Could not create user in KeyCloak: Unexpected response status: {}", response.getStatusCode());
+                log.warn("Could not create user in KeyCloak: Unexpected response status: {}", response.getStatusCode());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -132,6 +145,79 @@ public class KeyCloakServiceImpl implements KeycloakService {
             e.printStackTrace();
             throw new RuntimeException("Failed to get user ID: " + e.getMessage());
         }
+    }
+
+    public Object login(String adminJWT, LoginRequest loginRequest) {
+        String url = "http://localhost:9090/realms/neighborhood-services-realm/protocol/openid-connect/token";
+        // Prepare the form data (application/x-www-form-urlencoded)
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("client_id", clientId);
+        formData.add("username", loginRequest.email());
+        formData.add("password", loginRequest.password());
+        formData.add("grant_type", "password");
+
+        // Set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(adminJWT);
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        // Create the HTTP request
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(formData, headers);
+
+        log.debug("Keycloak Info: clientId:{}, adminUsername:{}, adminPassword:{}", clientId, adminUsername, adminPassword);
+
+        try {
+            // Make the POST request
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    requestEntity,
+                    String.class
+            );
+
+            // Return the response body (JWT token)
+            String responseBody = response.getBody();
+
+
+            return responseBody;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to login user " + e.getMessage());
+        }
+
+    }
+
+    public void sendVerificationEmail(String adminJWT, String userId) {
+        String url = "http://localhost:9090/admin/realms/neighborhood-services-realm/users/"+userId+"/send-verify-email";
+
+        // Set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(adminJWT);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Create an empty body
+        HttpEntity<String> entity = new HttpEntity<>(null, headers); // Empty body
+
+
+        try {
+
+            // Make the PUT request
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, // Target URL
+                    HttpMethod.PUT, // HTTP Method
+                    entity, // HttpEntity with empty body
+                    String.class // Response type
+            );
+            if (response.getStatusCode() == HttpStatus.NO_CONTENT) {
+                log.info("Sent verification email successfully to user with id: {}", userId);
+            } else {
+                log.warn("Could not send verification email to user with id: {}. Unexpected response status: {}", userId, response.getStatusCode());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to create user: " + e.getMessage());
+        }
+
     }
 
 

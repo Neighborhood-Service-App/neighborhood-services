@@ -40,14 +40,7 @@ public class UserServiceImpl implements UserService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
-    @Value("${keycloak.admin.username}")
-    private String adminUsername;
 
-    @Value("${keycloak.admin.password}")
-    private String adminPassword;
-
-    @Value("${keycloak.admin.client-id}")
-    private String clientId;
 
 
 //  TODO : Enable account in keycloak
@@ -59,9 +52,8 @@ public class UserServiceImpl implements UserService {
             throw new ResourceAlreadyExistsException("User with email " + request.email()+ " already exists");
         }
 
-        log.debug("Keycloak Info: clientId:{}, adminUsername:{}, adminPassword:{}", clientId, adminUsername, adminPassword);
 
-        String adminJWT = keyCloakService.getAdminJwtToken(clientId, adminUsername, adminPassword);
+        String adminJWT = keyCloakService.getAdminJwtToken();
         log.debug("Got the admin JWT");
 
         RegisterKeycloakRequest registerKeycloakRequest = new RegisterKeycloakRequest(
@@ -90,7 +82,15 @@ public class UserServiceImpl implements UserService {
 //        Save the user to the database
         userRepository.save(user);
         log.info("User with id {} has been registered", user.getUserId());
+
+        keyCloakService.sendVerificationEmail(adminJWT, userId);
+
         return user.getUserId();
+    }
+
+    @Override
+    public Object login(LoginRequest loginRequest) {
+        return keyCloakService.login(keyCloakService.getAdminJwtToken(), loginRequest);
     }
 
 
@@ -191,6 +191,8 @@ public class UserServiceImpl implements UserService {
 
         return ResponseEntity.ok().body("File deleted successfully");
     }
+
+
 
     private String generateSignedUrl(String keyName) {
         return cloudFrontService.generateSignedUrl(keyName, 60);

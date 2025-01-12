@@ -1,6 +1,7 @@
 package com.neighborhoodservice.user.controller;
 
 import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
+import com.neighborhoodservice.user.dto.LoginRequest;
 import com.neighborhoodservice.user.dto.RegisterRequest;
 import com.neighborhoodservice.user.dto.UserPatchRequest;
 import com.neighborhoodservice.user.dto.UserResponse;
@@ -27,7 +28,7 @@ public class UserController {
     private final UserService userService;
     private final JWTUtils JWTUtils;
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<UUID> createUser(
             @RequestBody @Valid RegisterRequest registerRequest
     ) throws Exception {
@@ -91,6 +92,16 @@ public class UserController {
 
         UUID userId = JWTUtils.getUserIdFromToken(token);
         return userService.deleteProfilePicture(userId);
+
+    }
+
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(
+            @RequestBody @Valid LoginRequest loginRequest
+    ) throws Exception {
+
+        return ok(userService.login(loginRequest));
 
     }
 
