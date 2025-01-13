@@ -117,7 +117,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UUID deleteUser(UUID userId) {
+    public void deleteUser(UUID userId) {
 //      TODO: Delete all the jobs and ratings associated with the user
 
         User user = userRepository.findById(userId)
@@ -125,11 +125,15 @@ public class UserServiceImpl implements UserService {
 
 //      Delete the user
         userRepository.delete(user);
+        log.info("User with id {} has been deleted from database", userId);
 
 //      Delete the user's profile picture from S3
         awsService.deleteFile(bucketName, userId.toString());
-        log.info("User with id {} has been deleted", userId);
-        return userId;
+        log.info("User with id {} has profile picture deleted", userId);
+
+        keyCloakService.deleteUser(keyCloakService.getAdminJwtToken(), userId.toString());
+        log.info("User with id {} has been deleted from KeyCloak", userId);
+
     }
 
 

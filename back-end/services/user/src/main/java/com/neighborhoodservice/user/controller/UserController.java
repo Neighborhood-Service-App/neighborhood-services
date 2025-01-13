@@ -11,12 +11,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
+import static org.springframework.http.ResponseEntity.noContent;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
@@ -43,18 +45,18 @@ public class UserController {
         return ok(userService.getUserById(userId));
     }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<UUID> deleteUser(
-            @PathVariable UUID userId,
+    @DeleteMapping("/me")
+    public ResponseEntity<HttpStatus> deleteUser(
             @RequestHeader("Authorization") String token
     )throws Exception {
 
-//        Only admin can delete users
-        JWTUtils.hasAdminRole(token);
+        UUID userId = JWTUtils.getUserIdFromToken(token);
 
         log.info("Deleting user with id {}", userId);
 
-        return ok(userService.deleteUser(userId));
+        userService.deleteUser(userId);
+
+        return noContent().build();
 
     }
 

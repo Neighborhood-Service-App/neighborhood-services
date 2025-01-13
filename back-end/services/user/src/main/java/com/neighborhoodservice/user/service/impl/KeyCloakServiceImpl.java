@@ -220,5 +220,38 @@ public class KeyCloakServiceImpl implements KeycloakService {
 
     }
 
+    @Override
+    public void deleteUser(String adminJwt, String userId) {
+        String url = "http://localhost:9090/admin/realms/neighborhood-services-realm/users/"+userId;
+
+        // Set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(adminJwt);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> entity = new HttpEntity<>(null, headers); // Empty body
+
+
+        try {
+
+            // Make the DELETE request
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, // Target URL
+                    HttpMethod.DELETE, // HTTP Method
+                    entity, // HttpEntity with empty body
+                    String.class // Response type
+            );
+            if (response.getStatusCode() == HttpStatus.NO_CONTENT) {
+                log.info("Successfully deleted user with id: {} from KeyCloak", userId);
+            } else {
+                log.warn("Failed to delete user with id: {} from KeyCloak. Unexpected Response Status: {}", userId, response.getStatusCode());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to create user: " + e.getMessage());
+        }
+
+    }
+
 
 }

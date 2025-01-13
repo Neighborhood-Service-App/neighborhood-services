@@ -18,7 +18,7 @@ public interface UserService {
     UserResponse getUserById(UUID userId);
 
     @Transactional
-    UUID deleteUser(UUID userId);
+    void deleteUser(UUID userId);
 
     @Transactional
     UserResponse updateUser(UUID userId, UserPatchRequest userPatchRequest);
