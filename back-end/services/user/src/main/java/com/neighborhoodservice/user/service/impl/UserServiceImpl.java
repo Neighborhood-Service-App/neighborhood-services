@@ -185,13 +185,12 @@ public class UserServiceImpl implements UserService {
 
         awsService.deleteFile(bucketName, userId.toString());
 
-        User user = userRepository.findById(userId)
+//        Ensure that the user exists
+        userRepository.findById(userId)
                 .orElseThrow(
                         () -> new ResourceNotFoundException("User with ID " + userId + " not found")
        );
 
-
-        userRepository.save(user);
 
         return ResponseEntity.ok().body("File deleted successfully");
     }
