@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
@@ -154,10 +155,9 @@ class UserServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
         // Act
-        UUID result = userService.deleteUser(testUser.getUserId());
+        userService.deleteUser(testUser.getUserId());
 
         // Assert
-        assertEquals(testUser.getUserId(), result);
         verify(userRepository, times(1)).delete(testUser);
         verify(awsService, times(1)).deleteFile(any(), any());
     }
@@ -282,7 +282,7 @@ class UserServiceTest {
         doNothing().when(awsService).deleteFile(any(), any());
 
         // Act
-        ResponseEntity<String> result = userService.deleteProfilePicture(testUser.getUserId());
+        ResponseEntity<HttpStatus> result = userService.deleteProfilePicture(testUser.getUserId());
 
         // Assert
         assertEquals(200, result.getStatusCodeValue());

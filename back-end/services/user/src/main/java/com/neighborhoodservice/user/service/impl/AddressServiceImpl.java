@@ -3,6 +3,7 @@ package com.neighborhoodservice.user.service.impl;
 import com.neighborhoodservice.user.dto.AddressPatchMapper;
 import com.neighborhoodservice.user.dto.AddressRequest;
 import com.neighborhoodservice.user.dto.AddressResponse;
+import com.neighborhoodservice.user.exception.AuthorizationException;
 import com.neighborhoodservice.user.exception.ResourceAlreadyExistsException;
 import com.neighborhoodservice.user.exception.ResourceNotFoundException;
 import com.neighborhoodservice.user.model.Address;
@@ -36,7 +37,7 @@ public class AddressServiceImpl implements AddressService {
     private final AddressPatchMapper addressPatchMapper;
 
     @Override
-    public ResponseEntity<HttpStatus> addAddress(UUID userId, AddressRequest addressRequest) throws Exception {
+    public ResponseEntity<AddressResponse> addAddress(UUID userId, AddressRequest addressRequest) throws Exception {
 
 //        Check if user exists
         User user = userRepository.findById(userId)
@@ -73,8 +74,15 @@ public class AddressServiceImpl implements AddressService {
 
 //        Save address to the database
         addressRepository.save(address);
-        return ResponseEntity.created(new URI("/api/v1/users/" + userId + "/addresses/" + address.getAddressId()))
-                .build();
+        return ResponseEntity.ok(new AddressResponse(
+                address.getAddressId(),
+                address.getAddress(),
+                address.getCity(),
+                address.getPostalCode(),
+                address.getAddressType().toString(),
+                address.isDefault()
+        ));
+
     }
 
 
@@ -143,9 +151,28 @@ public class AddressServiceImpl implements AddressService {
 
     }
 
+    @Override
+    public AddressResponse getAddressById(UUID userId, Long addressId) {
+
+            Address address = getAddressById(addressId);
+
+            checkIfAddressBelongsToUser(userId, addressId, address);
+
+            return new AddressResponse(
+                    address.getAddressId(),
+                    address.getAddress(),
+                    address.getCity(),
+                    address.getPostalCode(),
+                    address.getAddressType().toString(),
+                    address.isDefault()
+            );
+
+        
+    }
+
     private void checkIfAddressBelongsToUser(UUID userId, Long addressId, Address address) {
         if (!address.getUser().getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("Address with id " + addressId + " is not found for user with id " + userId);
+            throw new AuthorizationException("Address with id " + addressId + " does not belong to user with id " + userId);
         }
     }
 
@@ -155,7 +182,6 @@ public class AddressServiceImpl implements AddressService {
             throw new ResourceNotFoundException("User with id " + userId + " not found");
         }
     }
-    
 
     
     private Address getAddressById(Long addressId) {

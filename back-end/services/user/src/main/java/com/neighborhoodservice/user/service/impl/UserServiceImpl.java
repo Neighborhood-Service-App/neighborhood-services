@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -176,12 +177,12 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
 
-        return ResponseEntity.ok().body("File uploaded successfully");
+        return ResponseEntity.created(URI.create(generateSignedUrl(userId.toString())).normalize()).build();
 
     }
 
     @Override
-    public ResponseEntity<String> deleteProfilePicture(UUID userId) {
+    public ResponseEntity<HttpStatus> deleteProfilePicture(UUID userId) {
 
         awsService.deleteFile(bucketName, userId.toString());
 
@@ -192,7 +193,7 @@ public class UserServiceImpl implements UserService {
        );
 
 
-        return ResponseEntity.ok().body("File deleted successfully");
+        return ResponseEntity.noContent().build();
     }
 
 

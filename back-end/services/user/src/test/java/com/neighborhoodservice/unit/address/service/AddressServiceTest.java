@@ -77,10 +77,10 @@ public class AddressServiceTest {
         when(geocodingService.getCoordinates(anyString())).thenReturn(Map.of("lat", 50.4501, "lng", 30.5234));
         when(addressRepository.save(any(Address.class))).thenReturn(testAddress);
 
-        ResponseEntity<HttpStatus> response = addressService.addAddress(testUser.getUserId(), addressRequest);
+        ResponseEntity<AddressResponse> response = addressService.addAddress(testUser.getUserId(), addressRequest);
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertTrue(response.getHeaders().getLocation().toString().contains("/api/v1/users/" + testUser.getUserId() + "/addresses/"));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
     }
 
     @Test

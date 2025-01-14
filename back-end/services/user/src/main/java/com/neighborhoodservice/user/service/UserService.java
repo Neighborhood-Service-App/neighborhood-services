@@ -5,6 +5,7 @@ import com.neighborhoodservice.user.dto.RegisterRequest;
 import com.neighborhoodservice.user.dto.UserPatchRequest;
 import com.neighborhoodservice.user.dto.UserResponse;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +26,7 @@ public interface UserService {
 
     ResponseEntity<String> updateProfilePicture(UUID userId, MultipartFile file) throws IOException;
 
-    ResponseEntity<String> deleteProfilePicture(UUID userId);
+    ResponseEntity<HttpStatus> deleteProfilePicture(UUID userId);
 
     Object login(LoginRequest loginRequest);
 }

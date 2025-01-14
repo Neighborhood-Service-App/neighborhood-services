@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface AddressService {
 
-    ResponseEntity<HttpStatus> addAddress(UUID userId, AddressRequest addressRequest) throws Exception;
+    ResponseEntity<AddressResponse> addAddress(UUID userId, AddressRequest addressRequest) throws Exception;
 
     List<AddressResponse> getAllAddresses(UUID userId);
 
@@ -20,4 +20,6 @@ public interface AddressService {
             UUID userId,
             Long addressId,
             AddressRequest addressRequest);
+
+    AddressResponse getAddressById(UUID userId, Long addressId);
 }

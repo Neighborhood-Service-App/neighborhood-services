@@ -26,17 +26,29 @@ public class AddressController {
     private final JWTUtils JWTUtils;
 
     @PostMapping
-    public ResponseEntity<HttpStatus> addAddress(
+    public ResponseEntity<AddressResponse> addAddress(
             @RequestBody @Valid AddressRequest addressRequest,
             @RequestHeader("Authorization") String token
     ) throws Exception {
 
         UUID userId = JWTUtils.getUserIdFromToken(token);
-        ResponseEntity<HttpStatus> result = addressService.addAddress(userId, addressRequest);
+        ResponseEntity<AddressResponse> result = addressService.addAddress(userId, addressRequest);
 
         log.info("New address added to user with id {}", userId);
         return result;
     }
+
+    @GetMapping("/{addressId}")
+    public ResponseEntity<AddressResponse> getAddressById(
+            @PathVariable Long addressId,
+            @RequestHeader("Authorization") String token
+    ) throws Exception {
+
+        UUID userId = JWTUtils.getUserIdFromToken(token);
+        return ResponseEntity.ok(addressService.getAddressById(userId, addressId));
+
+    }
+
     
     @GetMapping
     public ResponseEntity<List<AddressResponse>> getAllAddresses(
