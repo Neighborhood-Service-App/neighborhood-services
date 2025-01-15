@@ -5,7 +5,7 @@ FROM openjdk:21-jdk-slim
 WORKDIR /app
 
 # Copy the jar file from your local machine into the container
-COPY target/discovery.jar /app/discovery.jar
+COPY target/discovery-0.0.1-SNAPSHOT.jar /app/discovery.jar
 
 # Expose the port your service runs on (e.g., 8080)
 EXPOSE 8761
