@@ -9,7 +9,7 @@ FROM openjdk:21-jdk-slim
 WORKDIR /app
 
 # Copy the jar file from your local machine into the container
-COPY target/config-server.jar /app/config-server.jar
+COPY target/config-server-0.0.1-SNAPSHOT.jar /app/config-server.jar
 
 # Set environment variables using the build arguments
 ENV ISSUER_URI=$ISSUER_URI
