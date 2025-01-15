@@ -47,7 +47,7 @@ jobs:
     
     - name: Build Discovery Service Docker Image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/discovery:${{ github.sha }} back-end/discovery
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/discovery:${{ github.sha }} back-end/services/discovery
     
     - name: Push Discovery Service Docker Image
       run: |
