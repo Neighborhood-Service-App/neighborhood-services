@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'back-end/services/config-server/**'
+      - 'config-server/**'
   pull_request:
     branches:
       - main
     paths:
-      - 'back-end/services/config-server/**'
+      - 'config-server/**'
 
 jobs:
   build-and-push-config-service:
