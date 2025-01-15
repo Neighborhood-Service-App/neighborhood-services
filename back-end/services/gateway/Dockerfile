@@ -5,7 +5,7 @@ FROM openjdk:21-jdk-slim
 WORKDIR /app
 
 # Copy the jar file from your local machine into the container
-COPY target/gateway.jar /app/gateway.jar
+COPY target/gateway-0.0.1-SNAPSHOT.jar /app/gateway.jar
 
 # Expose the port your service runs on (e.g., 8080)
 EXPOSE 8100
