@@ -1,0 +1,54 @@
+name: Build and Push Discovery Service to Docker
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'back-end/services/gateway/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'back-end/services/gateway/**'
+
+jobs:
+  build-and-push-gateway-service:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Set up JDK 21
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin' # Use Eclipse Temurin
+          java-version: '21'
+
+      - name: Verify Java Version
+        run: java -version
+
+      - name: Build Config Server JAR
+        run: mvn -f back-end/services/gateway/pom.xml clean package -DskipTests
+
+      - name: Verify Build Output
+        run: ls -R back-end/services/gateway/target
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      - name: Build Gateway Service Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/gateway:${{ github.sha }} back-end/services/gateway
+
+      - name: Push Gateway Service Docker Image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/gateway:${{ github.sha }}
