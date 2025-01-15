@@ -16,4 +16,6 @@ public interface KeycloakService {
     void sendVerificationEmail(String adminJWT, String userId);
 
     void deleteUser(String adminJwt, String userId);
+
+    void enableUser(String adminJwt, String userId);
 }

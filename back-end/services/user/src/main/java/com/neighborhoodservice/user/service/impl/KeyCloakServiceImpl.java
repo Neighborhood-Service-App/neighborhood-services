@@ -195,8 +195,9 @@ public class KeyCloakServiceImpl implements KeycloakService {
         headers.setBearerAuth(adminJWT);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
+
         // Create an empty body
-        HttpEntity<String> entity = new HttpEntity<>(null, headers); // Empty body
+        HttpEntity<String> entity = new HttpEntity<String>(null, headers); // Empty body
 
 
         try {
@@ -251,6 +252,35 @@ public class KeyCloakServiceImpl implements KeycloakService {
             throw new RuntimeException("Failed to create user: " + e.getMessage());
         }
 
+    }
+
+    @Override
+    public void enableUser(String adminJwt, String userId) {
+        // The base URL for the Keycloak Admin API
+        String url = "http://localhost:9090/admin/realms/neighborhood-services-realm/users/" + userId;
+
+        // Set the authorization header with the admin JWT token
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + adminJwt);
+
+        String requestBody = "{\"emailVerified\": true}";
+
+        // Prepare the URL with the query parameter to search for the user by username
+
+        // Create the HTTP request entity
+        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            // Send the PUT request
+            restTemplate.exchange(
+                    url, HttpMethod.PUT, entity, String.class
+            );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to get user ID: " + e.getMessage());
+        }
     }
 
 

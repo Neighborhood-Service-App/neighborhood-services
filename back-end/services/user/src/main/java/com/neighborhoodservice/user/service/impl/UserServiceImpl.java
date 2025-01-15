@@ -84,7 +84,11 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         log.info("User with id {} has been registered", user.getUserId());
 
-        keyCloakService.sendVerificationEmail(adminJWT, userId);
+//        Send verification email
+//        keyCloakService.sendVerificationEmail(adminJWT, userId);
+
+//        Enable the user account(verify manually through keycloak's api)
+        keyCloakService.enableUser(adminJWT, userId);
 
         return user.getUserId();
     }
