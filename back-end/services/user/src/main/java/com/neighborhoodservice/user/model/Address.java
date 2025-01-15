@@ -1,6 +1,7 @@
 package com.neighborhoodservice.user.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -8,6 +9,7 @@ import lombok.*;
  * The address entity. Used for location of the job and calculation of the distance between the job and the user.
  */
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

@@ -10,13 +10,7 @@ public class UserMapper {
 
 
 
-    public User toUser(RegisterRequest registerRequest) {
-        return User.builder()
-                .userId(UUID.fromString(registerRequest.id()))
-                .email(registerRequest.email())
-                .build();
 
-    }
 
     public UserResponse fromUser(User user) {
         return new UserResponse(

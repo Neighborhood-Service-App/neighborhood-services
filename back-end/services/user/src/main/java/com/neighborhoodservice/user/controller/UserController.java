@@ -1,20 +1,24 @@
 package com.neighborhoodservice.user.controller;
 
 import com.neighborhoodservice.user.authorizationUtils.JWTUtils;
+import com.neighborhoodservice.user.dto.LoginRequest;
 import com.neighborhoodservice.user.dto.RegisterRequest;
 import com.neighborhoodservice.user.dto.UserPatchRequest;
 import com.neighborhoodservice.user.dto.UserResponse;
 import com.neighborhoodservice.user.service.UserService;
+import com.neighborhoodservice.user.service.impl.UserServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
+import static org.springframework.http.ResponseEntity.noContent;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
@@ -26,13 +30,11 @@ public class UserController {
     private final UserService userService;
     private final JWTUtils JWTUtils;
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<UUID> createUser(
-            @RequestBody @Valid RegisterRequest registerRequest,
-            @RequestHeader("Authorization") String token
+            @RequestBody @Valid RegisterRequest registerRequest
     ) throws Exception {
 
-        JWTUtils.hasAdminRole(token);
 
         return ok(userService.registerUser(registerRequest));
 
@@ -43,18 +45,18 @@ public class UserController {
         return ok(userService.getUserById(userId));
     }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<UUID> deleteUser(
-            @PathVariable UUID userId,
+    @DeleteMapping("/me")
+    public ResponseEntity<HttpStatus> deleteUser(
             @RequestHeader("Authorization") String token
     )throws Exception {
 
-//        Only admin can delete users
-        JWTUtils.hasAdminRole(token);
+        UUID userId = JWTUtils.getUserIdFromToken(token);
 
         log.info("Deleting user with id {}", userId);
 
-        return ok(userService.deleteUser(userId));
+        userService.deleteUser(userId);
+
+        return noContent().build();
 
     }
 
@@ -83,7 +85,6 @@ public class UserController {
         return userService.updateProfilePicture(userId, file);
 
     }
-//    TODO: Add endpoint to get a file from a bucket(or from cache if it exists)
 
     // Endpoint to delete a file from a bucket
     @DeleteMapping("/profile-picture")
@@ -93,6 +94,16 @@ public class UserController {
 
         UUID userId = JWTUtils.getUserIdFromToken(token);
         return userService.deleteProfilePicture(userId);
+
+    }
+
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(
+            @RequestBody @Valid LoginRequest loginRequest
+    ) throws Exception {
+
+        return ok(userService.login(loginRequest));
 
     }
 
