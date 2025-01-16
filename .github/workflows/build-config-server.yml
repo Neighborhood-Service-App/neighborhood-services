@@ -49,9 +49,9 @@ jobs:
       run: |
         docker build --build-arg ISSUER_URI=${{ secrets.ISSUER_URI }} \
                      --build-arg JWK_SET_URI=${{ secrets.JWK_SET_URI }} \
-                     -t ${{ secrets.DOCKER_USERNAME }}/config-server:${{ github.sha }} \
+                     -t ${{ secrets.DOCKER_USERNAME }}/config-server:latest \
                      back-end/services/config-server
     
     - name: Push Config Service Docker Image
       run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/config-server:${{ github.sha }}
+        docker push ${{ secrets.DOCKER_USERNAME }}/config-server:latest

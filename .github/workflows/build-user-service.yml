@@ -37,38 +37,61 @@ jobs:
         run: |
           docker build --build-arg ISSUER_URI=${{ secrets.ISSUER_URI }} \
                        --build-arg JWK_SET_URI=${{ secrets.JWK_SET_URI }} \
-                       -t ${{ secrets.DOCKER_USERNAME }}/user:latest \
+                       -t ${{ secrets.DOCKER_USERNAME }}/user-service:latest \
                        back-end/services/user
+
+      # Log in to Docker Hub to access private images
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      # Pull the Config Server image
+      - name: Pull Config Server Image
+        run: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/config-server:latest
 
       # Run config server container and wait for it to be ready
       - name: Run Config Server in Docker
         run: |
-          docker run -d -p 8888:8888 --name config-server ${{ secrets.DOCKER_USERNAME }}/config-server
+          docker run -d -p 8888:8888 --name config-server ${{ secrets.DOCKER_USERNAME }}/config-server:latest
           echo "Waiting for Config Server to be ready..."
           until curl --silent --fail http://localhost:8888/actuator/health; do
             echo "Waiting for Config Service to be ready..."
             sleep 5
           done
 
+      # Pull the Discovery Service image
+      - name: Pull Discovery Service Image
+        run: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/discovery-service:latest
+
       # Run discovery service container and wait for it to be ready
       - name: Run Discovery Service in Docker
         run: |
-          docker run -d -p 8761:8761 --name discovery-service ${{ secrets.DOCKER_USERNAME }}/discovery-service
+          docker run -d -p 8761:8761 --name discovery-service ${{ secrets.DOCKER_USERNAME }}/discovery-service:latest
           echo "Waiting for Discovery Service to be ready..."
           until curl --silent --fail http://localhost:8761/actuator/health; do
             echo "Waiting for Discovery Service to be ready..."
             sleep 5
           done
 
+      # Pull the Gateway Service image
+      - name: Pull Gateway Service Image
+        run: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/gateway-service:latest
+
       # Run gateway service container and wait for it to be ready
       - name: Run Gateway Service in Docker
         run: |
-          docker run -d -p 8100:8100 --name gateway-service ${{ secrets.DOCKER_USERNAME }}/gateway-service
+          docker run -d -p 8100:8100 --name gateway-service ${{ secrets.DOCKER_USERNAME }}/gateway-service:latest
           echo "Waiting for Gateway Service to be ready..."
           until curl --silent --fail http://localhost:8100/actuator/health; do
             echo "Waiting for Gateway Service to be ready..."
             sleep 5
           done
+
 
       # Build and run User Service container with required build arguments
       - name: Build User Service Docker Image

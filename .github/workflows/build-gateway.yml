@@ -47,8 +47,8 @@ jobs:
 
       - name: Build Gateway Service Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/gateway:${{ github.sha }} back-end/services/gateway
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/gateway:latest back-end/services/gateway
 
       - name: Push Gateway Service Docker Image
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/gateway:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/gateway:latest
