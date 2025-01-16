@@ -67,15 +67,12 @@ jobs:
         run: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/discovery:latest
 
-      # Run Discovery Service container and wait for it to be ready
+      # Run Discovery Service container
       - name: Run Discovery Service in Docker
         run: |
           docker run -d -p 8761:8761 --name discovery ${{ secrets.DOCKER_USERNAME }}/discovery:latest
           echo "Waiting for Discovery Service to be ready..."
-          until curl --silent --fail http://localhost:8761/actuator/health; do
-            echo "Waiting for Discovery Service to be ready..."
-            sleep 5
-          done
+          
 
       # Pull the Gateway Service image
       - name: Pull Gateway Service Image
