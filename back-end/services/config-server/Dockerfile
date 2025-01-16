@@ -19,4 +19,4 @@ ENV JWK_SET_URI=$JWK_SET_URI
 EXPOSE 8888
 
 # Run the service when the container starts
-CMD ["java", "-jar", "config-server.jar"]
+CMD ["java", "-jar", "config-server.jar", "--spring.profiles.active=native"]
