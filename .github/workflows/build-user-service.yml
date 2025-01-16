@@ -30,15 +30,6 @@ jobs:
       - name: Verify Java Version
         run: java -version
 
-      - name: Build Config Server JAR
-        run: mvn -f back-end/services/config-server/pom.xml clean package -DskipTests
-
-      - name: Build Discovery Service JAR
-        run: mvn -f back-end/services/discovery/pom.xml clean package -DskipTests
-
-      - name: Build Gateway Service JAR
-        run: mvn -f back-end/services/gateway/pom.xml clean package -DskipTests
-
       - name: Build User Service JAR
         run: mvn -f back-end/services/user/pom.xml clean package -DskipTests
 
@@ -79,15 +70,23 @@ jobs:
             sleep 5
           done
 
-      # Run user service container and wait for it to be ready
-      - name: Run User Service in Docker
+      # Build and run User Service container with required build arguments
+      - name: Build User Service Docker Image
         run: |
-          docker run -d -p 8080:8080 --name user-service ${{ secrets.DOCKER_USERNAME }}/user-service:latest
-          echo "Waiting for User Service to be ready..."
-          until curl --silent --fail http://localhost:8080/actuator/health; do
-            echo "Waiting for User Service to be ready..."
-            sleep 5
-          done
+          docker build \
+            --build-arg CLOUDFRONT_DOMAIN_NAME=${{ secrets.CLOUDFRONT_DOMAIN_NAME }} \
+            --build-arg CLOUDFRONT_KEY_PAIR_ID=${{ secrets.CLOUDFRONT_KEY_PAIR_ID }} \
+            --build-arg CLOUDFRONT_PRIVATE_KEY=${{ secrets.CLOUDFRONT_PRIVATE_KEY }} \
+            --build-arg GOOGLE_GEOCODING_API_KEY=${{ secrets.GOOGLE_GEOCODING_API_KEY }} \
+            --build-arg KEYCLOAK_ADMIN_CLIENT_ID=${{ secrets.KEYCLOAK_ADMIN_CLIENT_ID }} \
+            --build-arg KEYCLOAK_ADMIN_PASSWORD=${{ secrets.KEYCLOAK_ADMIN_PASSWORD }} \
+            --build-arg KEYCLOAK_ADMIN_USERNAME=${{ secrets.KEYCLOAK_ADMIN_USERNAME }} \
+            --build-arg KEYCLOAK_PUBLIC_KEY=${{ secrets.KEYCLOAK_PUBLIC_KEY }} \
+            --build-arg KEYCLOAK_REALM=${{ secrets.KEYCLOAK_REALM }} \
+            --build-arg S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }} \
+            --build-arg S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }} \
+            -t ${{ secrets.DOCKER_USERNAME }}/user-service:latest \
+            back-end/services/user
 
       # NOTE: Running keycloak, it's db and postgres locally is required. (Working on pushing configured keycloak to docker hub)
 
