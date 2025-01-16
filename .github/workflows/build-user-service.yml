@@ -67,12 +67,12 @@ jobs:
         run: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/discovery:latest
 
-      # Run discovery service container and wait for it to be ready
+      # Run Discovery Service container and wait for it to be ready
       - name: Run Discovery Service in Docker
         run: |
           docker run -d -p 8761:8761 --name discovery ${{ secrets.DOCKER_USERNAME }}/discovery:latest
           echo "Waiting for Discovery Service to be ready..."
-          until curl --silent --fail http://localhost:8761/eureka/apps; do
+          until curl --silent --fail http://localhost:8761/actuator/health; do
             echo "Waiting for Discovery Service to be ready..."
             sleep 5
           done
@@ -82,13 +82,13 @@ jobs:
         run: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/gateway:latest
 
-      # Run gateway service container and wait for it to be ready
+      # Run Gateway Service container and wait for it to be registered in Eureka
       - name: Run Gateway Service in Docker
         run: |
           docker run -d -p 8100:8100 --name gateway ${{ secrets.DOCKER_USERNAME }}/gateway:latest
-          echo "Waiting for Gateway Service to be ready..."
-          until curl --silent --fail http://localhost:8100/actuator/health; do
-            echo "Waiting for Gateway Service to be ready..."
+          echo "Waiting for Gateway Service to be registered in Eureka..."
+          until curl --silent --fail http://localhost:8761/eureka/apps/GATEWAY-SERVICE/localhost:gateway-service:8100; do
+            echo "Waiting for Gateway Service to be registered in Eureka..."
             sleep 5
           done
 
@@ -110,6 +110,18 @@ jobs:
             --build-arg S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }} \
             -t ${{ secrets.DOCKER_USERNAME }}/user-service:latest \
             back-end/services/user
+          
+          # Run the User Service container in Docker
+          docker run -d -p 8080:8080 --name user ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+          
+          # Wait for the User Service to be registered in Eureka and be up
+          echo "Waiting for User Service to be registered in Eureka..."
+          until curl --silent --fail http://localhost:8761/eureka/apps/USER-SERVICE/localhost:user-service:8080; do
+            echo "Waiting for User Service to be registered in Eureka..."
+            sleep 5
+          done
+          echo "User Service is up and registered in Eureka."
+
 
       # NOTE: Running keycloak, it's db and postgres locally is required. (Working on pushing configured keycloak to docker hub)
 
