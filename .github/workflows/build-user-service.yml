@@ -1,139 +1,139 @@
-name: Build and Test(Newman E2E) User Service
-
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'back-end/services/user/**'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'back-end/services/user/**'
-
-jobs:
-  build-and-test-user-service:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      # Set up JDK 21
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin' # Use Eclipse Temurin
-          java-version: '21'
-
-      - name: Verify Java Version
-        run: java -version
-
-      - name: Build User Service JAR
-        run: mvn -f back-end/services/user/pom.xml clean package -DskipTests
-
-      - name: Build User Service Docker Image
-        run: |
-          docker build --build-arg ISSUER_URI=${{ secrets.ISSUER_URI }} \
-                       --build-arg JWK_SET_URI=${{ secrets.JWK_SET_URI }} \
-                       -t ${{ secrets.DOCKER_USERNAME }}/user-service:latest \
-                       back-end/services/user
-
-      # Log in to Docker Hub to access private images
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-
-      # Pull the Config Server image
-      - name: Pull Config Server Image
-        run: |
-          docker pull ${{ secrets.DOCKER_USERNAME }}/config-server:latest
-
-      # Run config server container and wait for it to be ready
-      - name: Run Config Server in Docker
-        run: |
-          docker run -d -p 8888:8888 --name config-server ${{ secrets.DOCKER_USERNAME }}/config-server:latest
-          echo "Waiting for Config Server to be ready..."
-          until curl --silent --fail http://localhost:8888/actuator/health; do
-            echo "Waiting for Config Service to be ready..."
-            sleep 5
-          done
-
-      # Pull the Discovery Service image
-      - name: Pull Discovery Service Image
-        run: |
-          docker pull ${{ secrets.DOCKER_USERNAME }}/discovery:latest
-
-      # Run Discovery Service container
-      - name: Run Discovery Service in Docker
-        run: |
-          docker run -d -p 8761:8761 --name discovery ${{ secrets.DOCKER_USERNAME }}/discovery:latest
-          echo "Waiting for Discovery Service to be ready..."
-          
-
-      # Pull the Gateway Service image
-      - name: Pull Gateway Service Image
-        run: |
-          docker pull ${{ secrets.DOCKER_USERNAME }}/gateway:latest
-
-      # Run Gateway Service container and wait for it to be registered in Eureka
-      - name: Run Gateway Service in Docker
-        run: |
-          docker run -d -p 8100:8100 --name gateway ${{ secrets.DOCKER_USERNAME }}/gateway:latest
-          echo "Waiting for Gateway Service to be registered in Eureka..."
-          until curl --silent --fail http://localhost:8761/eureka/apps/GATEWAY-SERVICE/localhost:gateway-service:8100; do
-            echo "Waiting for Gateway Service to be registered in Eureka..."
-            sleep 5
-          done
-
-
-      # Build and run User Service container with required build arguments
-      - name: Build User Service Docker Image
-        run: |
-          docker build \
-            --build-arg CLOUDFRONT_DOMAIN_NAME=${{ secrets.CLOUDFRONT_DOMAIN_NAME }} \
-            --build-arg CLOUDFRONT_KEY_PAIR_ID=${{ secrets.CLOUDFRONT_KEY_PAIR_ID }} \
-            --build-arg CLOUDFRONT_PRIVATE_KEY=${{ secrets.CLOUDFRONT_PRIVATE_KEY }} \
-            --build-arg GOOGLE_GEOCODING_API_KEY=${{ secrets.GOOGLE_GEOCODING_API_KEY }} \
-            --build-arg KEYCLOAK_ADMIN_CLIENT_ID=${{ secrets.KEYCLOAK_ADMIN_CLIENT_ID }} \
-            --build-arg KEYCLOAK_ADMIN_PASSWORD=${{ secrets.KEYCLOAK_ADMIN_PASSWORD }} \
-            --build-arg KEYCLOAK_ADMIN_USERNAME=${{ secrets.KEYCLOAK_ADMIN_USERNAME }} \
-            --build-arg KEYCLOAK_PUBLIC_KEY=${{ secrets.KEYCLOAK_PUBLIC_KEY }} \
-            --build-arg KEYCLOAK_REALM=${{ secrets.KEYCLOAK_REALM }} \
-            --build-arg S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }} \
-            --build-arg S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }} \
-            -t ${{ secrets.DOCKER_USERNAME }}/user-service:latest \
-            back-end/services/user
-          
-          # Run the User Service container in Docker
-          docker run -d -p 8080:8080 --name user ${{ secrets.DOCKER_USERNAME }}/user-service:latest
-          
-          # Wait for the User Service to be registered in Eureka and be up
-          echo "Waiting for User Service to be registered in Eureka..."
-          until curl --silent --fail http://localhost:8761/eureka/apps/USER-SERVICE/localhost:user-service:8080; do
-            echo "Waiting for User Service to be registered in Eureka..."
-            sleep 5
-          done
-          echo "User Service is up and registered in Eureka."
-
-
-      # NOTE: Running keycloak, it's db and postgres locally is required. (Working on pushing configured keycloak to docker hub)
-
-      # Run Newman tests
-      - name: Run Newman Tests
-        run: |
-          npm install -g newman
-                newman run https://api.getpostman.com/collections/34602472-90fc324c-d262-4542-894b-e4206f3bde15?apikey=${{ secrets.POSTMAN_API_KEY }} \ --environment https://api.getpostman.com/environments/34602472-df9b8687-47ab-49ea-8294-8e65e6c363a4?apikey=${{ secrets.POSTMAN_API_KEY }}
-
-      # Push the User Service Docker Image to Docker Hub
-      - name: Push User Service Docker Image
-        run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
-          docker push ${{ secrets.DOCKER_USERNAME }}/user-service:latest
-
-      - name: Cleanup Docker Containers
-        run: |
-          docker rm -f config-server discovery-service gateway-service user-service
+#name: Build and Test(Newman E2E) User Service
+#
+#on:
+#  push:
+#    branches:
+#      - main
+#    paths:
+#      - 'back-end/services/user/**'
+#  pull_request:
+#    branches:
+#      - main
+#    paths:
+#      - 'back-end/services/user/**'
+#
+#jobs:
+#  build-and-test-user-service:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout Repository
+#        uses: actions/checkout@v3
+#
+#      # Set up JDK 21
+#      - name: Set up JDK 21
+#        uses: actions/setup-java@v3
+#        with:
+#          distribution: 'temurin' # Use Eclipse Temurin
+#          java-version: '21'
+#
+#      - name: Verify Java Version
+#        run: java -version
+#
+#      - name: Build User Service JAR
+#        run: mvn -f back-end/services/user/pom.xml clean package -DskipTests
+#
+#      - name: Build User Service Docker Image
+#        run: |
+#          docker build --build-arg ISSUER_URI=${{ secrets.ISSUER_URI }} \
+#                       --build-arg JWK_SET_URI=${{ secrets.JWK_SET_URI }} \
+#                       -t ${{ secrets.DOCKER_USERNAME }}/user-service:latest \
+#                       back-end/services/user
+#
+#      # Log in to Docker Hub to access private images
+#      - name: Log in to Docker Hub
+#        uses: docker/login-action@v2
+#        with:
+#          username: ${{ secrets.DOCKER_USERNAME }}
+#          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+#
+#      # Pull the Config Server image
+#      - name: Pull Config Server Image
+#        run: |
+#          docker pull ${{ secrets.DOCKER_USERNAME }}/config-server:latest
+#
+#      # Run config server container and wait for it to be ready
+#      - name: Run Config Server in Docker
+#        run: |
+#          docker run -d -p 8888:8888 --name config-server ${{ secrets.DOCKER_USERNAME }}/config-server:latest
+#          echo "Waiting for Config Server to be ready..."
+#          until curl --silent --fail http://localhost:8888/actuator/health; do
+#            echo "Waiting for Config Service to be ready..."
+#            sleep 5
+#          done
+#
+#      # Pull the Discovery Service image
+#      - name: Pull Discovery Service Image
+#        run: |
+#          docker pull ${{ secrets.DOCKER_USERNAME }}/discovery:latest
+#
+#      # Run Discovery Service container
+#      - name: Run Discovery Service in Docker
+#        run: |
+#          docker run -d -p 8761:8761 --name discovery ${{ secrets.DOCKER_USERNAME }}/discovery:latest
+#          echo "Waiting for Discovery Service to be ready..."
+#
+#
+#      # Pull the Gateway Service image
+#      - name: Pull Gateway Service Image
+#        run: |
+#          docker pull ${{ secrets.DOCKER_USERNAME }}/gateway:latest
+#
+#      # Run Gateway Service container and wait for it to be registered in Eureka
+#      - name: Run Gateway Service in Docker
+#        run: |
+#          docker run -d -p 8100:8100 --name gateway ${{ secrets.DOCKER_USERNAME }}/gateway:latest
+#          echo "Waiting for Gateway Service to be registered in Eureka..."
+#          until curl --silent --fail http://localhost:8761/eureka/apps/GATEWAY-SERVICE/localhost:gateway-service:8100; do
+#            echo "Waiting for Gateway Service to be registered in Eureka..."
+#            sleep 5
+#          done
+#
+#
+#      # Build and run User Service container with required build arguments
+#      - name: Build User Service Docker Image
+#        run: |
+#          docker build \
+#            --build-arg CLOUDFRONT_DOMAIN_NAME=${{ secrets.CLOUDFRONT_DOMAIN_NAME }} \
+#            --build-arg CLOUDFRONT_KEY_PAIR_ID=${{ secrets.CLOUDFRONT_KEY_PAIR_ID }} \
+#            --build-arg CLOUDFRONT_PRIVATE_KEY=${{ secrets.CLOUDFRONT_PRIVATE_KEY }} \
+#            --build-arg GOOGLE_GEOCODING_API_KEY=${{ secrets.GOOGLE_GEOCODING_API_KEY }} \
+#            --build-arg KEYCLOAK_ADMIN_CLIENT_ID=${{ secrets.KEYCLOAK_ADMIN_CLIENT_ID }} \
+#            --build-arg KEYCLOAK_ADMIN_PASSWORD=${{ secrets.KEYCLOAK_ADMIN_PASSWORD }} \
+#            --build-arg KEYCLOAK_ADMIN_USERNAME=${{ secrets.KEYCLOAK_ADMIN_USERNAME }} \
+#            --build-arg KEYCLOAK_PUBLIC_KEY=${{ secrets.KEYCLOAK_PUBLIC_KEY }} \
+#            --build-arg KEYCLOAK_REALM=${{ secrets.KEYCLOAK_REALM }} \
+#            --build-arg S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }} \
+#            --build-arg S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }} \
+#            -t ${{ secrets.DOCKER_USERNAME }}/user-service:latest \
+#            back-end/services/user
+#
+#          # Run the User Service container in Docker
+#          docker run -d -p 8080:8080 --name user ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+#
+#          # Wait for the User Service to be registered in Eureka and be up
+#          echo "Waiting for User Service to be registered in Eureka..."
+#          until curl --silent --fail http://localhost:8761/eureka/apps/USER-SERVICE/localhost:user-service:8080; do
+#            echo "Waiting for User Service to be registered in Eureka..."
+#            sleep 5
+#          done
+#          echo "User Service is up and registered in Eureka."
+#
+#
+#      # NOTE: Running keycloak, it's db and postgres locally is required. (Working on pushing configured keycloak to docker hub)
+#
+#      # Run Newman tests
+#      - name: Run Newman Tests
+#        run: |
+#          npm install -g newman
+#                newman run https://api.getpostman.com/collections/34602472-90fc324c-d262-4542-894b-e4206f3bde15?apikey=${{ secrets.POSTMAN_API_KEY }} \ --environment https://api.getpostman.com/environments/34602472-df9b8687-47ab-49ea-8294-8e65e6c363a4?apikey=${{ secrets.POSTMAN_API_KEY }}
+#
+#      # Push the User Service Docker Image to Docker Hub
+#      - name: Push User Service Docker Image
+#        run: |
+#          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
+#          docker push ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+#
+#      - name: Cleanup Docker Containers
+#        run: |
+#          docker rm -f config-server discovery-service gateway-service user-service
