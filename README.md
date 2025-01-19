@@ -24,16 +24,17 @@ This service is all about providing opportunities for everyone, regardless of ra
 
 ## Features
 
-- **Job Posting & Applications**: Users can create job posts or apply for available jobs.
-- **Authentication & Authorization**: Secured using **Keycloak** for role-based access.
-- **Location-Based Services**: Integrated with **Google Geocoding API** for address management and geolocation.
-- **Cloud Integration**: Utilizes **AWS S3** for file storage and **CloudFront** for content delivery.
-- **Microservices Architecture**: Backend split into independent, scalable services.
-- **Notifications**: To notify users of job-related updates (using **Kafka** soon).
-- **Caching**: To improve performance with **Redis** (coming soon).
-- **Containerization**: Services are containerized with **Docker** for efficient deployment.
-- **CI/CD Pipelines**: Automating deployment and scaling.
-[🔼 Back to top](#about)
+- 📝 **Job Posting & Applications**: Users can create job posts or apply for available jobs.
+- 🔐 **Authentication & Authorization**: Secured using **Keycloak** for role-based access.
+- 🌍 **Location-Based Services**: Integrated with **Google Geocoding API** for address management and geolocation.
+- ☁️ **Cloud Integration**: Utilizes **AWS S3** for file storage and **CloudFront** for content delivery.
+- ⚙️ **Microservices Architecture**: Backend split into independent, scalable services.
+- 📲 **Notifications**: To notify users of job-related updates (using **Kafka** soon).
+- ⚡ **Caching**: To improve performance with **Redis** (coming soon).
+- 🐳 **Containerization**: Services are containerized with **Docker** for efficient deployment.
+- 🔄 **CI/CD Pipelines**: Automating deployment and scaling.
+
+
 <br>
 <br>
 
@@ -41,9 +42,14 @@ This service is all about providing opportunities for everyone, regardless of ra
 
 ### V1
 ![Neighborhood Service  drawio](https://github.com/user-attachments/assets/ab3ef4be-ebb5-41a3-9c4f-71614af95be0)
+<br><br>
+<p align="right">
+  <a href="#about" style="font-size: 20px; font-weight: bold; text-decoration: none;">
+    🔼 Back to top
+  </a>
+</p>
 
-[🔼 Back to top](#about)
-
+<br><br>
 ## Tech Stack
 
 - ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) 
@@ -57,4 +63,10 @@ This service is all about providing opportunities for everyone, regardless of ra
 - ![Kafka](https://img.shields.io/badge/Kafka-231F20?style=for-the-badge&logo=apachekafka&logoColor=white) (Planned)
 - ![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white) 
 - ![Maven](https://img.shields.io/badge/Maven-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
-[🔼 Back to top](#about)
+  <br><br>
+<p align="right">
+  <a href="#about" style="font-size: 20px; font-weight: bold; text-decoration: none;">
+    🔼 Back to top
+  </a>
+</p>
+
