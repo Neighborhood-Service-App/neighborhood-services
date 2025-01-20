@@ -1,6 +1,7 @@
-package com.dragand.neighborhoodservice.jobpost.model;
+package com.dragand.neighborhoodservice.jobpost.model.jobPost;
 
 
+import com.dragand.neighborhoodservice.jobpost.model.applicant.Applicant;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +11,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -78,6 +81,9 @@ public class JobPost {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private JobPostStatus status;
+
+    @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Applicant> applicants = new ArrayList<>();
 
 
     /**

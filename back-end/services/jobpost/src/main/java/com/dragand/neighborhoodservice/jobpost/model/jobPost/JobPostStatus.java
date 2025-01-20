@@ -1,4 +1,4 @@
-package com.dragand.neighborhoodservice.jobpost.model;
+package com.dragand.neighborhoodservice.jobpost.model.jobPost;
 
 public enum JobPostStatus {
     OPEN,
